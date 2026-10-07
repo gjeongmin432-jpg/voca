@@ -1,0 +1,2976 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>보카마스터 (VocaMaster) - 영단어 학습 & 퀴즈</title>
+
+  <!-- PWA & Mobile Web App Meta Tags -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#3b82f6">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="보카마스터">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+  <style>
+    :root {
+      --bg-body: #f8fafc;
+      --bg-card: #ffffff;
+      --bg-card-subtle: #f1f5f9;
+      --bg-hover: #e2e8f0;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --text-subtle: #94a3b8;
+      --border-color: #e2e8f0;
+      --primary: #3b82f6;
+      --primary-hover: #2563eb;
+      --primary-soft: #eff6ff;
+      --primary-text: #1d4ed8;
+      --success: #10b981;
+      --success-soft: #ecfdf5;
+      --success-text: #047857;
+      --error: #ef4444;
+      --error-soft: #fef2f2;
+      --error-text: #b91c1c;
+      --warning: #f59e0b;
+      --warning-soft: #fffbeb;
+      --warning-text: #b45309;
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+      --radius-full: 9999px;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.07);
+      --shadow-lg: 0 10px 25px rgba(0,0,0,0.1);
+      --font-family: -apple-system, BlinkMacSystemFont, "Pretendard", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    [data-theme="dark"] {
+      --bg-body: #0b0f19;
+      --bg-card: #151d2e;
+      --bg-card-subtle: #1e293b;
+      --bg-hover: #334155;
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --text-subtle: #64748b;
+      --border-color: #27354f;
+      --primary: #3b82f6;
+      --primary-hover: #60a5fa;
+      --primary-soft: rgba(59, 130, 246, 0.15);
+      --primary-text: #93c5fd;
+      --success: #10b981;
+      --success-soft: rgba(16, 185, 129, 0.15);
+      --success-text: #6ee7b7;
+      --error: #f43f5e;
+      --error-soft: rgba(244, 63, 94, 0.15);
+      --error-text: #fda4af;
+      --warning: #f59e0b;
+      --warning-soft: rgba(245, 158, 11, 0.15);
+      --warning-text: #fcd34d;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.4);
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.5);
+      --shadow-lg: 0 10px 25px rgba(0,0,0,0.7);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: var(--font-family);
+      background-color: var(--bg-body);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transition: background-color 0.25s, color 0.25s;
+      padding: 0 12px 60px 12px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .app-container {
+      width: 100%;
+      max-width: 680px;
+      margin: 0 auto;
+    }
+
+    /* Header */
+    header {
+      padding: 18px 0 14px 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border-color);
+      margin-bottom: 16px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-icon {
+      width: 38px;
+      height: 38px;
+      background: linear-gradient(135deg, #3b82f6, #6366f1);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      box-shadow: 0 3px 8px rgba(59, 130, 246, 0.3);
+    }
+
+    .brand-title {
+      font-size: 1.25rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: var(--text-main);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .icon-btn {
+      width: 38px;
+      height: 38px;
+      border-radius: var(--radius-md);
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .icon-btn:hover {
+      background-color: var(--bg-hover);
+      transform: translateY(-1px);
+    }
+
+    /* Tabs Navigation */
+    .nav-tabs {
+      display: flex;
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 4px;
+      gap: 4px;
+      margin-bottom: 18px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 10px 4px;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 0.88rem;
+      font-weight: 600;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .tab-btn.active {
+      background-color: var(--primary);
+      color: #ffffff;
+      box-shadow: 0 2px 6px rgba(59, 130, 246, 0.35);
+    }
+
+    .badge-count {
+      background-color: var(--error);
+      color: white;
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: var(--radius-full);
+      line-height: 1;
+    }
+
+    .tab-btn.active .badge-count {
+      background-color: #ffffff;
+      color: var(--primary);
+    }
+
+    /* Common Card Styles */
+    .card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 22px;
+      margin-bottom: 16px;
+      box-shadow: var(--shadow-sm);
+      transition: all 0.25s ease;
+    }
+
+    /* Monthly Attendance Calendar & Stamp Styles */
+    .attendance-card {
+      background: linear-gradient(145deg, var(--bg-card), var(--bg-card-subtle));
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 18px 20px;
+      margin-bottom: 18px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .attendance-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .attendance-date {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .streak-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 10px;
+      border-radius: var(--radius-full);
+      background-color: var(--warning-soft);
+      color: var(--warning-text);
+      font-size: 0.82rem;
+      font-weight: 700;
+    }
+
+    .calendar-nav-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      padding: 0 2px;
+    }
+
+    .calendar-month-title {
+      font-size: 1rem;
+      font-weight: 800;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .cal-nav-btn {
+      width: 30px;
+      height: 30px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-color);
+      background-color: var(--bg-card);
+      color: var(--text-main);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      transition: all 0.2s;
+    }
+
+    .cal-nav-btn:hover {
+      background-color: var(--bg-hover);
+      border-color: var(--primary);
+    }
+
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+      margin-bottom: 12px;
+    }
+
+    .calendar-weekday {
+      text-align: center;
+      font-size: 0.76rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      padding: 4px 0;
+    }
+    .calendar-weekday.sun { color: #f43f5e; }
+    .calendar-weekday.sat { color: #3b82f6; }
+
+    .calendar-day-cell {
+      position: relative;
+      min-height: 46px;
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 4px 2px;
+      transition: all 0.15s;
+    }
+
+    .calendar-day-cell.empty {
+      background-color: transparent;
+      border: 1px dashed transparent;
+    }
+
+    .calendar-day-cell.today {
+      border: 2px solid var(--primary);
+      box-shadow: 0 0 0 2px var(--primary-soft);
+      font-weight: 800;
+    }
+
+    .calendar-day-num {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-main);
+      line-height: 1;
+      z-index: 1;
+    }
+    .calendar-day-cell.sun .calendar-day-num { color: #f43f5e; }
+    .calendar-day-cell.sat .calendar-day-num { color: #3b82f6; }
+
+    /* Stamp Graphic (도장) */
+    .calendar-stamp {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -36%) rotate(-8deg);
+      width: 32px;
+      height: 32px;
+      border: 2px solid #e11d48;
+      border-radius: 50%;
+      background: rgba(225, 29, 72, 0.08);
+      color: #e11d48;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.58rem;
+      font-weight: 900;
+      line-height: 1;
+      pointer-events: none;
+      box-shadow: 0 0 0 1px rgba(225, 29, 72, 0.2) inset;
+    }
+
+    .calendar-stamp::after {
+      content: '출석';
+      letter-spacing: -0.5px;
+    }
+
+    .calendar-stamp-star {
+      font-size: 0.55rem;
+      margin-bottom: 1px;
+    }
+
+    .calendar-stamp.just-stamped {
+      animation: stampDrop 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
+
+    @keyframes stampDrop {
+      0% {
+        transform: translate(-50%, -36%) scale(2.8) rotate(24deg);
+        opacity: 0;
+      }
+      70% {
+        transform: translate(-50%, -36%) scale(0.9) rotate(-14deg);
+        opacity: 1;
+      }
+      100% {
+        transform: translate(-50%, -36%) scale(1) rotate(-8deg);
+        opacity: 1;
+      }
+    }
+
+    .attendance-footer-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+      padding: 0 4px;
+    }
+
+    .btn-attendance {
+      width: 100%;
+      padding: 12px;
+      border-radius: var(--radius-md);
+      border: none;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+
+    .btn-attendance.not-checked {
+      background-color: var(--primary);
+      color: #ffffff;
+      box-shadow: 0 3px 10px rgba(59, 130, 246, 0.3);
+    }
+
+    .btn-attendance.not-checked:hover {
+      background-color: var(--primary-hover);
+      transform: translateY(-1px);
+    }
+
+    .btn-attendance.checked {
+      background-color: var(--success-soft);
+      color: var(--success-text);
+      border: 1px solid var(--success);
+      cursor: default;
+    }
+
+    /* Views */
+    .view-content {
+      display: none;
+      animation: fadeIn 0.25s ease-in-out;
+    }
+
+    .view-content.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Quiz Setup */
+    .section-title {
+      font-size: 1.15rem;
+      font-weight: 800;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .mode-select-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .mode-card {
+      border: 2px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background-color: var(--bg-card);
+    }
+
+    .mode-card:hover {
+      border-color: var(--primary);
+      background-color: var(--primary-soft);
+    }
+
+    .mode-card.selected {
+      border-color: var(--primary);
+      background-color: var(--primary-soft);
+      box-shadow: 0 0 0 2px var(--primary-soft);
+    }
+
+    .mode-card-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .mode-icon {
+      font-size: 1.5rem;
+    }
+
+    .mode-title {
+      font-size: 0.98rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .mode-desc {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .radio-circle {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border: 2px solid var(--border-color);
+      position: relative;
+    }
+
+    .mode-card.selected .radio-circle {
+      border-color: var(--primary);
+    }
+
+    .mode-card.selected .radio-circle::after {
+      content: '';
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background-color: var(--primary);
+    }
+
+    .setting-row {
+      margin-bottom: 18px;
+    }
+
+    .setting-label {
+      font-size: 0.88rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: var(--text-muted);
+      display: block;
+    }
+
+    .count-selector {
+      display: flex;
+      gap: 8px;
+    }
+
+    .count-pill {
+      flex: 1;
+      padding: 10px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-color);
+      background-color: var(--bg-card);
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s;
+    }
+
+    .count-pill:hover {
+      border-color: var(--primary);
+    }
+
+    .count-pill.active {
+      background-color: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+
+    .info-banner {
+      background-color: var(--primary-soft);
+      border: 1px solid rgba(59, 130, 246, 0.25);
+      border-radius: var(--radius-md);
+      padding: 12px 14px;
+      font-size: 0.85rem;
+      color: var(--primary-text);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .btn-main {
+      width: 100%;
+      min-height: 52px;
+      border-radius: var(--radius-md);
+      border: none;
+      background-color: var(--primary);
+      color: white;
+      font-size: 1.05rem;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 4px 14px rgba(59, 130, 246, 0.35);
+      transition: all 0.2s;
+    }
+
+    .btn-main:hover {
+      background-color: var(--primary-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 18px rgba(59, 130, 246, 0.45);
+    }
+
+    .btn-secondary {
+      width: 100%;
+      min-height: 48px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-color);
+      background-color: var(--bg-card);
+      color: var(--text-main);
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 10px;
+      transition: all 0.2s;
+    }
+
+    .btn-secondary:hover {
+      background-color: var(--bg-hover);
+    }
+
+    /* Active Quiz Screen */
+    .quiz-progress-bar-container {
+      width: 100%;
+      height: 8px;
+      background-color: var(--bg-hover);
+      border-radius: var(--radius-full);
+      overflow: hidden;
+      margin-bottom: 14px;
+    }
+
+    .quiz-progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #3b82f6, #10b981);
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    .quiz-top-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .quiz-step-badge {
+      font-size: 0.92rem;
+      font-weight: 800;
+      color: var(--primary);
+      background-color: var(--primary-soft);
+      padding: 4px 10px;
+      border-radius: var(--radius-full);
+    }
+
+    .quiz-score-pill {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .score-green { color: var(--success); }
+    .score-red { color: var(--error); }
+
+    .btn-quit {
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: var(--radius-sm);
+    }
+
+    .btn-quit:hover {
+      color: var(--error);
+      background-color: var(--error-soft);
+    }
+
+    .question-box {
+      background: linear-gradient(135deg, var(--bg-card), var(--bg-card-subtle));
+      border: 2px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 28px 20px;
+      text-align: center;
+      margin-bottom: 20px;
+      position: relative;
+    }
+
+    .question-mode-tag {
+      position: absolute;
+      top: 12px;
+      left: 14px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--text-subtle);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .question-text {
+      font-size: 1.85rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: var(--text-main);
+      word-break: break-word;
+      margin: 10px 0 6px 0;
+    }
+
+    .tts-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: var(--radius-full);
+      border: 1px solid var(--border-color);
+      background-color: var(--bg-card);
+      color: var(--primary);
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-top: 6px;
+    }
+
+    .tts-btn:hover {
+      background-color: var(--primary-soft);
+      transform: scale(1.04);
+    }
+
+    /* 5 Multiple Choice Options */
+    .choices-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .choice-btn {
+      width: 100%;
+      min-height: 54px;
+      padding: 12px 18px;
+      border-radius: var(--radius-md);
+      border: 2px solid var(--border-color);
+      background-color: var(--bg-card);
+      color: var(--text-main);
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      text-align: left;
+      gap: 14px;
+      transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      user-select: none;
+    }
+
+    .choice-btn:hover:not(:disabled) {
+      border-color: var(--primary);
+      background-color: var(--primary-soft);
+      transform: translateY(-1px);
+    }
+
+    .choice-btn:active:not(:disabled) {
+      transform: scale(0.99);
+    }
+
+    .choice-num {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background-color: var(--bg-hover);
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.15s;
+    }
+
+    .choice-text {
+      flex: 1;
+      font-size: 1rem;
+      line-height: 1.4;
+      word-break: break-word;
+    }
+
+    .choice-indicator {
+      font-size: 1.2rem;
+      font-weight: 800;
+      display: none;
+    }
+
+    /* Choice states */
+    .choice-btn.correct {
+      border-color: var(--success) !important;
+      background-color: var(--success-soft) !important;
+      color: var(--success-text) !important;
+      animation: correctPulse 0.4s ease;
+    }
+
+    .choice-btn.correct .choice-num {
+      background-color: var(--success);
+      color: white;
+    }
+
+    .choice-btn.correct .choice-indicator {
+      display: block;
+      color: var(--success);
+    }
+
+    .choice-btn.incorrect {
+      border-color: var(--error) !important;
+      background-color: var(--error-soft) !important;
+      color: var(--error-text) !important;
+      animation: wrongShake 0.4s ease;
+    }
+
+    .choice-btn.incorrect .choice-num {
+      background-color: var(--error);
+      color: white;
+    }
+
+    .choice-btn.incorrect .choice-indicator {
+      display: block;
+      color: var(--error);
+    }
+
+    @keyframes correctPulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.02); }
+      100% { transform: scale(1); }
+    }
+
+    @keyframes wrongShake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-6px); }
+      40%, 80% { transform: translateX(6px); }
+    }
+
+    /* Quiz Result Screen */
+    .result-score-circle {
+      text-align: center;
+      padding: 24px 0 16px 0;
+    }
+
+    .result-percentage {
+      font-size: 3.4rem;
+      font-weight: 900;
+      letter-spacing: -1px;
+      line-height: 1;
+      background: linear-gradient(135deg, #3b82f6, #10b981);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 8px;
+    }
+
+    .result-score-fraction {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+
+    .result-feedback-badge {
+      display: inline-block;
+      padding: 6px 18px;
+      border-radius: var(--radius-full);
+      font-size: 0.95rem;
+      font-weight: 800;
+      margin-bottom: 16px;
+    }
+
+    .badge-excellent { background-color: var(--success-soft); color: var(--success-text); border: 1px solid var(--success); }
+    .badge-good { background-color: var(--primary-soft); color: var(--primary-text); border: 1px solid var(--primary); }
+    .badge-fair { background-color: var(--warning-soft); color: var(--warning-text); border: 1px solid var(--warning); }
+    .badge-poor { background-color: var(--error-soft); color: var(--error-text); border: 1px solid var(--error); }
+
+    .result-stats-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+
+    .result-stat-card {
+      flex: 1;
+      background-color: var(--bg-card-subtle);
+      border-radius: var(--radius-md);
+      padding: 14px 10px;
+      text-align: center;
+    }
+
+    .result-stat-val {
+      font-size: 1.3rem;
+      font-weight: 800;
+      margin-bottom: 2px;
+    }
+
+    .result-stat-lbl {
+      font-size: 0.76rem;
+      color: var(--text-muted);
+    }
+
+    .review-list-title {
+      font-size: 1rem;
+      font-weight: 800;
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .review-items {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 280px;
+      overflow-y: auto;
+      margin-bottom: 20px;
+      padding-right: 4px;
+    }
+
+    .review-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      border-radius: var(--radius-md);
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      gap: 10px;
+    }
+
+    .review-item.is-wrong {
+      border-left: 4px solid var(--error);
+      background-color: var(--error-soft);
+    }
+
+    .review-item.is-correct {
+      border-left: 4px solid var(--success);
+    }
+
+    .review-word-en {
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: var(--text-main);
+    }
+
+    .review-word-ko {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    /* Vocabulary & Wrong Note common styles */
+    .search-input-wrapper {
+      position: relative;
+      margin-bottom: 14px;
+    }
+
+    .search-input {
+      width: 100%;
+      height: 44px;
+      padding: 10px 14px 10px 38px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-color);
+      background-color: var(--bg-card);
+      color: var(--text-main);
+      font-size: 0.92rem;
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    .search-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--primary-soft);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-subtle);
+      font-size: 1rem;
+    }
+
+    .vocab-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 480px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .vocab-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      border-radius: var(--radius-md);
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      transition: all 0.15s;
+    }
+
+    .vocab-item:hover {
+      border-color: var(--primary);
+    }
+
+    .vocab-info {
+      flex: 1;
+    }
+
+    .vocab-en {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 2px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .vocab-ko {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+    }
+
+    .vocab-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-sm-icon {
+      width: 34px;
+      height: 34px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-color);
+      background-color: var(--bg-card-subtle);
+      color: var(--text-main);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      transition: all 0.2s;
+    }
+
+    .btn-sm-icon:hover {
+      background-color: var(--bg-hover);
+      transform: scale(1.05);
+    }
+
+    .btn-delete-wrong {
+      color: var(--error);
+    }
+
+    .btn-delete-wrong:hover {
+      background-color: var(--error-soft);
+      border-color: var(--error);
+    }
+
+    /* Flashcard View */
+    .flashcard-container {
+      perspective: 1000px;
+      margin: 20px 0;
+      height: 220px;
+      cursor: pointer;
+    }
+
+    .flashcard-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      text-align: center;
+      transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      transform-style: preserve-3d;
+    }
+
+    .flashcard-inner.flipped {
+      transform: rotateY(180deg);
+    }
+
+    .flashcard-front, .flashcard-back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      -webkit-backface-visibility: hidden;
+      backface-visibility: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      border-radius: var(--radius-lg);
+      border: 2px solid var(--border-color);
+      background: linear-gradient(135deg, var(--bg-card), var(--bg-card-subtle));
+      box-shadow: var(--shadow-md);
+    }
+
+    .flashcard-back {
+      transform: rotateY(180deg);
+      border-color: var(--primary);
+      background: linear-gradient(135deg, var(--primary-soft), var(--bg-card));
+    }
+
+    .flashcard-prompt {
+      font-size: 0.8rem;
+      color: var(--text-subtle);
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+
+    .flashcard-word {
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+
+    .flashcard-hint {
+      font-size: 0.78rem;
+      color: var(--text-subtle);
+      margin-top: 14px;
+    }
+
+    .flashcard-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* File Upload Box */
+    .upload-dropzone {
+      border: 2px dashed var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 30px 20px;
+      text-align: center;
+      background-color: var(--bg-card-subtle);
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-bottom: 16px;
+    }
+
+    .upload-dropzone:hover, .upload-dropzone.dragover {
+      border-color: var(--primary);
+      background-color: var(--primary-soft);
+    }
+
+    .upload-icon {
+      font-size: 2.4rem;
+      color: var(--primary);
+      margin-bottom: 10px;
+    }
+
+    .upload-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 4px;
+    }
+
+    .upload-desc {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+
+    /* Empty state */
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--text-muted);
+    }
+
+    .empty-icon {
+      font-size: 2.8rem;
+      margin-bottom: 10px;
+    }
+
+    .empty-text {
+      font-size: 0.95rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .empty-subtext {
+      font-size: 0.82rem;
+      color: var(--text-subtle);
+    }
+
+    /* Toast Notification */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background-color: #1e293b;
+      color: #ffffff;
+      padding: 12px 22px;
+      border-radius: var(--radius-full);
+      font-size: 0.9rem;
+      font-weight: 600;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+      z-index: 9999;
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      pointer-events: none !important;
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    /* Confetti Canvas */
+    #confetti-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none !important;
+      z-index: 9998;
+    }
+
+    /* Scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: var(--border-color);
+      border-radius: 4px;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 480px) {
+      body {
+        padding: 0 8px 50px 8px;
+      }
+      .card {
+        padding: 16px;
+      }
+      .question-text {
+        font-size: 1.5rem;
+      }
+      .choice-btn {
+        min-height: 50px;
+        padding: 10px 14px;
+        font-size: 0.94rem;
+      }
+      .result-percentage {
+        font-size: 2.8rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="confetti-canvas"></canvas>
+
+  <div class="app-container">
+    <!-- Header -->
+    <header>
+      <div class="brand">
+        <div class="brand-icon">📚</div>
+        <div>
+          <div class="brand-title">보카마스터</div>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button id="btn-sound-toggle" class="icon-btn" title="효과음 켜기/끄기">🔊</button>
+        <button id="btn-theme-toggle" class="icon-btn" title="다크 모드 전환">🌙</button>
+      </div>
+    </header>
+
+    <!-- Daily Attendance Card (Monthly Calendar with Stamp) -->
+    <div class="attendance-card">
+      <div class="attendance-header">
+        <div class="attendance-date" id="display-today-date">2026년 10월 7일 수요일</div>
+        <div class="streak-badge" id="display-streak-badge">🔥 0일 연속</div>
+      </div>
+
+      <!-- Calendar Navigation Bar -->
+      <div class="calendar-nav-bar">
+        <button class="cal-nav-btn" id="btn-cal-prev" title="이전 달">◀</button>
+        <div class="calendar-month-title" id="cal-month-title">📅 2026년 10월</div>
+        <button class="cal-nav-btn" id="btn-cal-next" title="다음 달">▶</button>
+      </div>
+
+      <!-- Calendar Grid -->
+      <div class="calendar-grid" id="attendance-calendar-grid">
+        <!-- Dynamically rendered weekdays and day stamp cells -->
+      </div>
+
+      <div class="attendance-footer-info">
+        <span>이번 달 출석 도장: <strong id="cal-month-count" style="color: #e11d48; font-weight: 800;">0</strong>개</span>
+        <span id="cal-today-status-text">오늘 출석 전</span>
+      </div>
+
+      <button class="btn-attendance not-checked" id="btn-do-attendance">
+        <span>💮 오늘 출석 도장 찍기</span>
+      </button>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <nav class="nav-tabs">
+      <button class="tab-btn active" data-tab="quiz">🎯 퀴즈</button>
+      <button class="tab-btn" data-tab="vocab">📖 단어장</button>
+      <button class="tab-btn" data-tab="wrong">
+        📝 오답노트 <span class="badge-count" id="tab-wrong-count">0</span>
+      </button>
+      <button class="tab-btn" data-tab="settings">⚙️ 관리</button>
+    </nav>
+
+    <!-- TAB 1: QUIZ -->
+    <section id="tab-view-quiz" class="view-content active">
+      <!-- Quiz Setup Screen -->
+      <div id="quiz-setup-screen" class="card">
+        <h2 class="section-title"><span>🎯</span> 시험 모드 설정</h2>
+
+        <div class="mode-select-grid">
+          <div class="mode-card selected" data-mode="en-to-ko">
+            <div class="mode-card-left">
+              <span class="mode-icon">🇺🇸 ➔ 🇰🇷</span>
+              <div>
+                <div class="mode-title">영 ➔ 한 퀴즈</div>
+                <div class="mode-desc">영어 단어를 보고 알맞은 한국어 뜻 고르기</div>
+              </div>
+            </div>
+            <div class="radio-circle"></div>
+          </div>
+
+          <div class="mode-card" data-mode="ko-to-en">
+            <div class="mode-card-left">
+              <span class="mode-icon">🇰🇷 ➔ 🇺🇸</span>
+              <div>
+                <div class="mode-title">한 ➔ 영 퀴즈</div>
+                <div class="mode-desc">한국어 뜻을 보고 알맞은 영단어 고르기</div>
+              </div>
+            </div>
+            <div class="radio-circle"></div>
+          </div>
+
+          <div class="mode-card" data-mode="mixed">
+            <div class="mode-card-left">
+              <span class="mode-icon">🔀</span>
+              <div>
+                <div class="mode-title">혼합 모드</div>
+                <div class="mode-desc">문제마다 영➔한, 한➔영 랜덤 출제</div>
+              </div>
+            </div>
+            <div class="radio-circle"></div>
+          </div>
+        </div>
+
+        <div class="setting-row">
+          <label class="setting-label">문제 수 선택</label>
+          <div class="count-selector">
+            <div class="count-pill" data-count="10">10문제</div>
+            <div class="count-pill" data-count="20">20문제</div>
+            <div class="count-pill active" data-count="30">30문제</div>
+            <div class="count-pill" data-count="50">50문제</div>
+          </div>
+        </div>
+
+        <div class="info-banner" id="quiz-wrong-prio-info">
+          <span>💡</span>
+          <div>
+            <strong>오답노트 우선 출제</strong>: 이전에 틀린 단어가 이번 시험에 최우선으로 포함됩니다.
+          </div>
+        </div>
+
+        <button class="btn-main" id="btn-start-quiz">
+          <span>🚀 30문제 시험 시작하기</span>
+        </button>
+
+        <button class="btn-secondary" id="btn-start-wrong-only" style="display: none;">
+          <span>📝 오답노트 단어로만 퀴즈 풀기 (<span id="wrong-only-count">0</span>개)</span>
+        </button>
+      </div>
+
+      <!-- Active Quiz Screen (Hidden initially) -->
+      <div id="quiz-active-screen" class="card" style="display: none;">
+        <div class="quiz-progress-bar-container">
+          <div class="quiz-progress-fill" id="quiz-progress-fill"></div>
+        </div>
+
+        <div class="quiz-top-info">
+          <div class="quiz-step-badge" id="quiz-step-display">문제 1 / 30</div>
+          <div class="quiz-score-pill">
+            <span class="score-green">✓ <span id="quiz-live-correct">0</span></span>
+            <span class="score-red">✗ <span id="quiz-live-wrong">0</span></span>
+          </div>
+          <button class="btn-quit" id="btn-abort-quiz">시험 중단</button>
+        </div>
+
+        <div class="question-box">
+          <div class="question-mode-tag" id="question-mode-tag">영 ➔ 한</div>
+          <div class="question-text" id="question-text">Conceal</div>
+          <button class="tts-btn" id="question-tts-btn" style="display: none;">
+            <span>🔊 발음 듣기</span>
+          </button>
+        </div>
+
+        <!-- 5 choices buttons -->
+        <div class="choices-list" id="choices-container">
+          <!-- Dynamically inserted choice buttons -->
+        </div>
+      </div>
+
+      <!-- Quiz Result Screen (Hidden initially) -->
+      <div id="quiz-result-screen" class="card" style="display: none;">
+        <h2 class="section-title"><span>📊</span> 시험 결과</h2>
+
+        <div class="result-score-circle">
+          <div class="result-percentage" id="result-percent">100%</div>
+          <div class="result-score-fraction" id="result-fraction">30 / 30 문제 정답</div>
+          <div class="result-feedback-badge badge-excellent" id="result-feedback-badge">🎉 완벽해요! 만점입니다!</div>
+        </div>
+
+        <div class="result-stats-row">
+          <div class="result-stat-card">
+            <div class="result-stat-val score-green" id="result-correct-count">30</div>
+            <div class="result-stat-lbl">맞힌 개수</div>
+          </div>
+          <div class="result-stat-card">
+            <div class="result-stat-val score-red" id="result-wrong-count">0</div>
+            <div class="result-stat-lbl">틀린 개수</div>
+          </div>
+          <div class="result-stat-card">
+            <div class="result-stat-val" id="result-time-taken">1분 12초</div>
+            <div class="result-stat-lbl">소요 시간</div>
+          </div>
+        </div>
+
+        <div class="info-banner" id="result-note-sync-banner" style="display: none;">
+          <span>📝</span>
+          <div id="result-note-sync-text">오답노트가 자동으로 업데이트되었습니다.</div>
+        </div>
+
+        <div class="review-list-title">
+          <span>문항별 풀이 결과</span>
+          <span style="font-size: 0.82rem; color: var(--text-muted);" id="review-summary-tag">30문제 풀이 완료</span>
+        </div>
+
+        <div class="review-items" id="result-review-items">
+          <!-- Dynamically inserted review cards -->
+        </div>
+
+        <button class="btn-main" id="btn-restart-quiz">
+          <span>🔄 다시 풀기</span>
+        </button>
+        <button class="btn-secondary" id="btn-retry-wrongs" style="display: none;">
+          <span>📝 이번에 틀린 문제만 다시 풀기</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- TAB 2: VOCABULARY -->
+    <section id="tab-view-vocab" class="view-content">
+      <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+          <h2 class="section-title" style="margin-bottom: 0;"><span>📖</span> 전체 단어장</h2>
+          <div style="display: flex; gap: 6px;">
+            <button class="count-pill active" id="btn-vocab-view-list" style="padding: 6px 10px; font-size: 0.8rem;">목록</button>
+            <button class="count-pill" id="btn-vocab-view-cards" style="padding: 6px 10px; font-size: 0.8rem;">플래시카드</button>
+          </div>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="search-input-wrapper">
+          <span class="search-icon">🔍</span>
+          <input type="text" class="search-input" id="vocab-search-input" placeholder="영단어 또는 한글 뜻 검색...">
+        </div>
+
+        <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 12px; display: flex; justify-content: space-between;">
+          <span>등록된 총 단어: <strong id="vocab-total-count" style="color: var(--primary);">551</strong>개</span>
+          <span id="vocab-search-match-count"></span>
+        </div>
+
+        <!-- List View -->
+        <div id="vocab-list-wrapper">
+          <div class="vocab-list" id="vocab-items-container">
+            <!-- Dynamic items -->
+          </div>
+        </div>
+
+        <!-- Flashcard View (Hidden by default) -->
+        <div id="vocab-flashcard-wrapper" style="display: none;">
+          <div class="flashcard-container" id="flashcard-box">
+            <div class="flashcard-inner" id="flashcard-inner">
+              <div class="flashcard-front">
+                <div class="flashcard-prompt">클릭하여 뜻 확인</div>
+                <div class="flashcard-word" id="fc-word-front">Conceal</div>
+                <button class="tts-btn" id="fc-tts-btn" style="margin-top: 14px;">🔊 발음 듣기</button>
+                <div class="flashcard-hint">카드 터치 시 뒤집힙니다</div>
+              </div>
+              <div class="flashcard-back">
+                <div class="flashcard-prompt">한국어 뜻</div>
+                <div class="flashcard-word" id="fc-word-back" style="font-size: 1.6rem;">숨기다</div>
+                <div class="flashcard-hint">카드 터치 시 영단어로 돌아갑니다</div>
+              </div>
+            </div>
+          </div>
+          <div class="flashcard-nav">
+            <button class="icon-btn" id="fc-prev-btn" style="width: auto; padding: 0 16px; font-size: 0.9rem;">◀ 이전</button>
+            <span style="font-size: 0.88rem; font-weight: 700; color: var(--text-muted);" id="fc-index-display">1 / 551</span>
+            <button class="icon-btn" id="fc-next-btn" style="width: auto; padding: 0 16px; font-size: 0.9rem;">다음 ▶</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3: WRONG ANSWER NOTE -->
+    <section id="tab-view-wrong" class="view-content">
+      <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+          <h2 class="section-title" style="margin-bottom: 0;"><span>📝</span> 오답노트</h2>
+          <button class="btn-quit" id="btn-clear-all-wrongs" style="font-size: 0.8rem; color: var(--error);">전체 비우기</button>
+        </div>
+
+        <div class="search-input-wrapper">
+          <span class="search-icon">🔍</span>
+          <input type="text" class="search-input" id="wrong-search-input" placeholder="오답노트 내 단어 검색...">
+        </div>
+
+        <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 12px;">
+          틀린 단어: <strong id="wrong-total-display" style="color: var(--error);">0</strong>개 (외운 단어는 [외움] 버튼으로 삭제)
+        </div>
+
+        <div class="vocab-list" id="wrong-items-container">
+          <!-- Dynamic wrong items -->
+        </div>
+
+        <button class="btn-main" id="btn-quiz-from-wrong-tab" style="margin-top: 16px; display: none;">
+          <span>🎯 오답 단어로 퀴즈 풀기</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- TAB 4: SETTINGS & FILE MANAGEMENT -->
+    <section id="tab-view-settings" class="view-content">
+      <div class="card">
+        <h2 class="section-title"><span>📂</span> 단어 파일 관리 (TXT)</h2>
+
+        <!-- Dropzone -->
+        <div class="upload-dropzone" id="upload-dropzone">
+          <div class="upload-icon">📄</div>
+          <div class="upload-title">새로운 단어 .txt 파일 등록</div>
+          <div class="upload-desc">이곳을 클릭하거나 .txt 파일을 끌어다 놓으세요</div>
+          <input type="file" id="file-input" accept=".txt" style="display: none;">
+        </div>
+
+        <div class="setting-row">
+          <label class="setting-label">단어 가져오기 방식</label>
+          <div class="count-selector" style="margin-bottom: 12px;">
+            <div class="count-pill active" id="pill-import-replace">기존 단어 교체</div>
+            <div class="count-pill" id="pill-import-append">기존 단어에 추가</div>
+          </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <button class="btn-secondary" id="btn-export-txt">
+            <span>📥 현재 단어장 TXT 파일로 다운로드</span>
+          </button>
+          <button class="btn-secondary" id="btn-restore-default">
+            <span>🔄 기본 단어장 (551개)으로 복원</span>
+          </button>
+          <button class="btn-secondary" id="btn-reset-userdata" style="color: var(--error); border-color: rgba(239, 68, 68, 0.3);">
+            <span>⚠️ 출석 기록 및 오답노트 전체 초기화</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 class="section-title"><span>ℹ️</span> 데이터 저장 안내</h2>
+        <div style="font-size: 0.88rem; line-height: 1.6; color: var(--text-muted);">
+          • 모든 단어장, 오답노트, 출석체크 기록은 브라우저의 <strong>localStorage</strong>에 안전하게 영구 저장됩니다.<br>
+          • 별도의 서버나 회원가입 없이 PC, 모바일 기기 모두에서 즉시 작동합니다.<br>
+          • 퀴즈 진행 중 오답노트에 등록된 단어를 맞히면 오답노트에서 자동으로 제거됩니다.
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="toast" id="toast-message">알림 메시지</div>
+
+  <script>
+    /* ========================================================
+       1. DEFAULT WORD DATASET (551 Words from word.txt)
+       ======================================================== */
+    const DEFAULT_WORDS = [{"en": "Conceal", "ko": "숨기다"}, {"en": "Appease", "ko": "달래다, 누그러뜨리다"}, {"en": "Soothe", "ko": "달래다"}, {"en": "enlighten", "ko": "이해시키다"}, {"en": "assimilate", "ko": "통화시키다"}, {"en": "Play down", "ko": "경시한다"}, {"en": "discern", "ko": "분간하다"}, {"en": "Mostar", "ko": "모르타르"}, {"en": "conceive", "ko": "생각하다"}, {"en": "excavate", "ko": "발굴하다"}, {"en": "realm", "ko": "왕국"}, {"en": "debasement", "ko": "가치하락"}, {"en": "dilute", "ko": "희석하다"}, {"en": "reissue", "ko": "재발행하다"}, {"en": "adulteration", "ko": "불순물 섞기"}, {"en": "Howard", "ko": "축적"}, {"en": "interminable", "ko": "끝없는"}, {"en": "dissolute", "ko": "방탕한"}, {"en": "replenished", "ko": "보충하다"}, {"en": "conspiracy", "ko": "음모"}, {"en": "perpetuate", "ko": "지속하다"}, {"en": "indigeneous", "ko": "토착의"}, {"en": "fertile", "ko": "비옥한"}, {"en": "Advent", "ko": "츌현"}, {"en": "incessant", "ko": "끊임없는"}, {"en": "Intermittent", "ko": "간헐적인"}, {"en": "Elaborate", "ko": "정교한"}, {"en": "Suspend", "ko": "중단하다"}, {"en": "Hold off", "ko": "연기하다"}, {"en": "Abide by", "ko": "준수하다"}, {"en": "Choline", "ko": "콜린"}, {"en": "Premise", "ko": "전제, 토지가 딸린 건물"}, {"en": "Clergy", "ko": "성직자들"}, {"en": "Clientele", "ko": "고객들"}, {"en": "Egalitarian", "ko": "평등중의자"}, {"en": "Pessimistic", "ko": "비관적인"}, {"en": "Gullible", "ko": "남을 잘 믿는"}, {"en": "Reassurance", "ko": "안심시키기"}, {"en": "Cherished", "ko": "소중히 아끼는"}, {"en": "Norm", "ko": "규범"}, {"en": "Disparate", "ko": "이질적인"}, {"en": "Empirically", "ko": "경험적으로"}, {"en": "Template", "ko": "템플릿"}, {"en": "Feat", "ko": "위업"}, {"en": "opulent", "ko": "호화로운"}, {"en": "Hit the roof", "ko": "머리 끝까지 화가 나다"}, {"en": "Brush up on", "ko": "복습하다"}, {"en": "Hear out", "ko": "말을 끝까지 들어주다"}, {"en": "Stick up for", "ko": "변호하다"}, {"en": "Lay off", "ko": "해고하다"}, {"en": "Semiotic", "ko": "기호학"}, {"en": "Commodity", "ko": "상품"}, {"en": "Detractor", "ko": "비방하는 사람들"}, {"en": "Distilled water", "ko": "증류주"}, {"en": "the deceased", "ko": "고인"}, {"en": "break off", "ko": "단절"}, {"en": "grieve", "ko": "애도하다"}, {"en": "slapped", "ko": "맞은"}, {"en": "momentary", "ko": "순간적인"}, {"en": "tellingly", "ko": "강력하게"}, {"en": "offspring", "ko": "자손"}, {"en": "in conjunction with ~", "ko": "와 함께"}, {"en": "In place of ~", "ko": "대신에"}, {"en": "in case of ~", "ko": "한다면"}, {"en": "pervasive", "ko": "만연하는"}, {"en": "deceptive", "ko": "현혹하는"}, {"en": "ubiquitous", "ko": "어디에나 있는"}, {"en": "vexed", "ko": "화가 난"}, {"en": "callous", "ko": "냉담한"}, {"en": "unruly", "ko": "제멋대로 하는"}, {"en": "reputable", "ko": "평판이 좋은"}, {"en": "line up", "ko": "줄을 서다"}, {"en": "give out", "ko": "나눠 주다"}, {"en": "carry on", "ko": "계속 가다"}, {"en": "break into", "ko": "침입하다"}, {"en": "notorious", "ko": "악명 높은"}, {"en": "by no means", "ko": "결코 ~ 아닌"}, {"en": "gill", "ko": "아가미"}, {"en": "sustain", "ko": "지속하다"}, {"en": "dismiss", "ko": "묵살하다"}, {"en": "fringe", "ko": "비주류"}, {"en": "self reliance", "ko": "자립"}, {"en": "vacant", "ko": "비어 있는"}, {"en": "indispensable", "ko": "없어서는 안 되는"}, {"en": "wearing", "ko": "out wicked"}, {"en": "chronic", "ko": "만성적인"}, {"en": "take ~ toll on ~", "ko": "에 타격을 가져오다"}, {"en": "fatigued", "ko": "지친"}, {"en": "used up", "ko": "녹초가 된"}, {"en": "disposable", "ko": "일회용의"}, {"en": "bombard with ~", "ko": "을 퍼붓다"}, {"en": "wardrobe", "ko": "옷장"}, {"en": "prerequisite", "ko": "전제 조건"}, {"en": "marginal", "ko": "미미한"}, {"en": "moderate", "ko": "그저 그런"}, {"en": "axiom", "ko": "자명한 이치"}, {"en": "Ludicrous", "ko": "터무니없는"}, {"en": "preposterous", "ko": "말도 안 되는"}, {"en": "inconceivable", "ko": "상상도 할 수 없는"}, {"en": "stand out", "ko": "두드러지다"}, {"en": "rudimentary", "ko": "가장 기초적인"}, {"en": "intensive", "ko": "집중적인"}, {"en": "That said", "ko": "그렇긴 하지만"}, {"en": "retreat", "ko": "후퇴"}, {"en": "deregulate", "ko": "규제를 철폐하다"}, {"en": "allege", "ko": "주장하다"}, {"en": "exploit", "ko": "착취하다"}, {"en": "monopolistic", "ko": "독점적인"}, {"en": "marginalized", "ko": "사회적으로 무시하다"}, {"en": "diffuse", "ko": "분산되다"}, {"en": "coalition", "ko": "연합"}, {"en": "affirmative", "ko": "긍정적인"}, {"en": "unearth", "ko": "파내다"}, {"en": "gravel", "ko": "자갈"}, {"en": "sheepishly", "ko": "소심하게"}, {"en": "gash", "ko": "틈"}, {"en": "Pit boss", "ko": "현장 감독"}, {"en": "Convince", "ko": "확신하는"}, {"en": "Detached", "ko": "무심한"}, {"en": "candid", "ko": "솔직한"}, {"en": "implicit", "ko": "함축적인"}, {"en": "conspicuous", "ko": "눈에 잘 띄는"}, {"en": "noticeable", "ko": "눈에 띄는"}, {"en": "homespun", "ko": "투박한"}, {"en": "inside out", "ko": "속속들이"}, {"en": "throughly", "ko": "속속들이"}, {"en": "tentatively", "ko": "머뭇거리며"}, {"en": "pay tribute to ~", "ko": "에게 경의를 표하는"}, {"en": "publicize", "ko": "광고하다"}, {"en": "intact", "ko": "그대로인"}, {"en": "prerequisite", "ko": "전제 조건"}, {"en": "worn out", "ko": "진부한"}, {"en": "hand me down", "ko": "독창성이 없는"}, {"en": "pre fab", "ko": "미리 만들어진"}, {"en": "authentically", "ko": "진정으로"}, {"en": "courteously", "ko": "예의 바르게"}, {"en": "informed", "ko": "잘 아는"}, {"en": "discernment", "ko": "안목"}, {"en": "reluctant", "ko": "꺼리는"}, {"en": "wrestle with ~", "ko": "와 씨름하다"}, {"en": "weary of ~", "ko": "싫증난"}, {"en": "strike down", "ko": "폐지하다"}, {"en": "amendment", "ko": "수정"}, {"en": "infringe", "ko": "침해하다"}, {"en": "homocide", "ko": "살인"}, {"en": "proponent", "ko": "지지자"}, {"en": "advocate", "ko": "옹호하다"}, {"en": "inequity", "ko": "불평등"}, {"en": "push back", "ko": "반발하다"}, {"en": "immediate", "ko": "인접한"}, {"en": "gland", "ko": "샘"}, {"en": "lash out at", "ko": "대항하다"}, {"en": "retain", "ko": "유지하다"}, {"en": "thereafter", "ko": "이후에"}, {"en": "clad", "ko": "을 입은"}, {"en": "proactive", "ko": "적극적인"}, {"en": "perpetual", "ko": "끊임없는"}, {"en": "legion", "ko": "다수"}, {"en": "authentic", "ko": "진정한"}, {"en": "exploit", "ko": "활용하다"}, {"en": "immense", "ko": "어마어마한"}, {"en": "given that", "ko": "을 고려하면"}, {"en": "constitute", "ko": "구성하다"}, {"en": "discern", "ko": "파악하다"}, {"en": "undermine", "ko": "약화시키다"}, {"en": "stand out", "ko": "눈에 띄다"}, {"en": "embody", "ko": "담다"}, {"en": "refer to as", "ko": "을 라고 지칭하다"}, {"en": "prod", "ko": "자극하다"}, {"en": "sap", "ko": "약화시키다"}, {"en": "adequate", "ko": "유능한"}, {"en": "lay off", "ko": "일시 해고하다"}, {"en": "explicit", "ko": "분명한"}, {"en": "dialect", "ko": "사투리"}, {"en": "adapt", "ko": "각색하다"}, {"en": "embrace", "ko": "이용하다"}, {"en": "cadence", "ko": "리듬"}, {"en": "staggering", "ko": "막대한"}, {"en": "derivative", "ko": "금융 파생 상품"}, {"en": "hierarchy", "ko": "지배층"}, {"en": "attain", "ko": "얻다"}, {"en": "compulsory", "ko": "의무적인"}, {"en": "mandatory", "ko": "의무적인"}, {"en": "disclose", "ko": "밝히다"}, {"en": "let on", "ko": "털어놓다"}, {"en": "let off", "ko": "의 책임에서 해방하다"}, {"en": "let up", "ko": "약해지다"}, {"en": "let down", "ko": "실망시키다"}, {"en": "turmoil", "ko": "불안"}, {"en": "extensive", "ko": "긴"}, {"en": "turn off", "ko": "흥미를 잃게 하다"}, {"en": "pragmatist", "ko": "실용주의자"}, {"en": "ailment", "ko": "질병"}, {"en": "realm", "ko": "영역"}, {"en": "Sustain", "ko": "살아가게 하다"}, {"en": "extraterrestrial", "ko": "외계의"}, {"en": "nausea", "ko": "메스꺼움"}, {"en": "disenchantment", "ko": "환멸"}, {"en": "enchantment", "ko": "황홀"}, {"en": "surplus", "ko": "잉여의"}, {"en": "underprivileged", "ko": "혜택을 받지 못하는"}, {"en": "boast of", "ko": "을 자랑하다"}, {"en": "on end", "ko": "계속하다"}, {"en": "come at a price", "ko": "대가가 따르다"}, {"en": "tear away", "ko": "억지로 떼어내다"}, {"en": "nourish", "ko": "영양분을 공급하다"}, {"en": "eradicate", "ko": "근절하다"}, {"en": "proliferate", "ko": "확산되다"}, {"en": "humility", "ko": "겸손"}, {"en": "frugality", "ko": "검소함"}, {"en": "punctuality", "ko": "시간 엄수"}, {"en": "preliminary", "ko": "예비"}, {"en": "Unquoted", "ko": "비상장의"}, {"en": "Pivotal", "ko": "중요한"}, {"en": "Perilous", "ko": "위험한"}, {"en": "Substantial", "ko": "중요한"}, {"en": "Aviation", "ko": "항공"}, {"en": "Collectible", "ko": "수집품"}, {"en": "Circadian", "ko": "생체의"}, {"en": "Extremity", "ko": "손발"}, {"en": "Deficiency", "ko": "결핍"}, {"en": "Humbling", "ko": "겸손해지게 하는"}, {"en": "Hands on", "ko": "직접 해보는"}, {"en": "outrun", "ko": "앞서 달리다"}, {"en": "endow", "ko": "부여하다"}, {"en": "primitive", "ko": "원시적인"}, {"en": "outwit", "ko": "능가하다"}, {"en": "deceit", "ko": "속임수"}, {"en": "marginally", "ko": "미미하게"}, {"en": "indiscernible", "ko": "구분할수 없게"}, {"en": "Dilute", "ko": "희석하다"}, {"en": "ferment", "ko": "발효시키다"}, {"en": "rule out", "ko": "배제하다"}, {"en": "pension", "ko": "연금"}, {"en": "exclude", "ko": "배제하다"}, {"en": "authorize", "ko": "인가하다"}, {"en": "let on", "ko": "털어놓다"}, {"en": "date back to ~", "ko": "까지 거슬러 올라가다"}, {"en": "stride", "ko": "진전"}, {"en": "exploit", "ko": "개발하다"}, {"en": "rouse", "ko": "불러일으키다"}, {"en": "apace", "ko": "발맞추어"}, {"en": "settle down", "ko": "정착하다"}, {"en": "mortage", "ko": "대출"}, {"en": "liberalize", "ko": "자유화하다, 완화하다"}, {"en": "scheme", "ko": "계획"}, {"en": "municipality", "ko": "지방자치 단체"}, {"en": "Charity", "ko": "자선"}, {"en": "bring up", "ko": "기르다"}, {"en": "abolished", "ko": "폐지되다"}, {"en": "get off work", "ko": "퇴근하다"}, {"en": "dedicate", "ko": "헌신하다"}, {"en": "deliberate", "ko": "신중한"}, {"en": "botanical", "ko": "식물의"}, {"en": "symbiosis", "ko": "공생의"}, {"en": "self sufficient", "ko": "자급자족하는"}, {"en": "sap", "ko": "수액"}, {"en": "bark", "ko": "나무껍질"}, {"en": "pervasive", "ko": "만연한"}, {"en": "fiscal", "ko": "회계"}, {"en": "immerse", "ko": "몰두시키다"}, {"en": "adaptable", "ko": "융통성있는"}, {"en": "vary", "ko": "달라지다"}, {"en": "with respect to", "ko": "에 대하여"}, {"en": "turn into", "ko": "변하다"}, {"en": "start over", "ko": "다시 시작하다"}, {"en": "put up with", "ko": "참고 견디다"}, {"en": "beat myself", "ko": "자책하다"}, {"en": "proprietary", "ko": "전매의"}, {"en": "apparatus", "ko": "장치"}, {"en": "sustained", "ko": "지속적인"}, {"en": "utter", "ko": "소리를 내다"}, {"en": "Protestant", "ko": "개신교"}, {"en": "aborigine", "ko": "원주민"}, {"en": "don", "ko": "입다"}, {"en": "attire", "ko": "복장"}, {"en": "petition", "ko": "청원서"}, {"en": "minted", "ko": "최근에 생겨난"}, {"en": "idiom", "ko": "언어"}, {"en": "on purpose", "ko": "일부러"}, {"en": "gratification", "ko": "만족감"}, {"en": "tranquility", "ko": "평온감"}, {"en": "engagement", "ko": "참여"}, {"en": "fall on", "ko": "을 엄습하다"}, {"en": "call for", "ko": "요구하다"}, {"en": "pick up", "ko": "듣게 되다"}, {"en": "turn down", "ko": "거절하다"}, {"en": "apprehend", "ko": "파악하다"}, {"en": "intrude", "ko": "침범하다"}, {"en": "encompass", "ko": "포함하다"}, {"en": "cast", "ko": "묘사하다"}, {"en": "signify", "ko": "의미하다"}, {"en": "in words of", "ko": "의 말을 빌리자면"}, {"en": "utility", "ko": "공익사업"}, {"en": "enthusiast", "ko": "열렬한 지지자"}, {"en": "onshore", "ko": "육지의"}, {"en": "drag on", "ko": "느릿하게 가다"}, {"en": "frivolous", "ko": "사소한"}, {"en": "put aside", "ko": "을 제쳐놓다"}, {"en": "come under", "ko": "포함되다"}, {"en": "speculation", "ko": "추측"}, {"en": "weigh on", "ko": "을 압박하다"}, {"en": "bestow", "ko": "주다"}, {"en": "empower", "ko": "권한을 부여하다"}, {"en": "give away", "ko": "나누어 주다"}, {"en": "do goodies", "ko": "공상적 사회 개량자"}, {"en": "incumbent on", "ko": "에게 의무로서 지워지는"}, {"en": "refugee", "ko": "난민"}, {"en": "premeditation", "ko": "계획"}, {"en": "encased", "ko": "방수의"}, {"en": "alleviate", "ko": "완화시키다 =assuage, lesson"}, {"en": "complement", "ko": "보완하다"}, {"en": "Shun", "ko": "기피하다 spurn"}, {"en": "amass", "ko": "수집하다"}, {"en": "discreet", "ko": "눈에 띄지 않는"}, {"en": "stand up for", "ko": "지키다"}, {"en": "assertive", "ko": "적극적인"}, {"en": "subservient", "ko": "부차적인"}, {"en": "sarcasm", "ko": "풍자"}, {"en": "weed out", "ko": "추려내다"}, {"en": "inherit", "ko": "물려받다"}, {"en": "heirloom", "ko": "가보"}, {"en": "tangible", "ko": "실체적인"}, {"en": "tumult", "ko": "소란"}, {"en": "swirl", "ko": "몰아치다"}, {"en": "prosperity", "ko": "번영"}, {"en": "excavate", "ko": "발굴하다 exhume"}, {"en": "Utter", "ko": "순전한 sheer"}, {"en": "Constitute", "ko": "구성하다"}, {"en": "haunt", "ko": "괴롭히다"}, {"en": "afflict", "ko": "괴롭히다"}, {"en": "crude", "ko": "허술한"}, {"en": "attribute to", "ko": "을 의 결과라 생각하다"}, {"en": "upend", "ko": "뒤엎다"}, {"en": "improvisation", "ko": "즉석에서 하기"}, {"en": "vacate", "ko": "떠나다"}, {"en": "sedentary", "ko": "주로 앉아서 하는"}, {"en": "keep abreast of ~", "ko": "에 뒤떨어지지 않다 stay informed about, stay current with"}, {"en": "Deport", "ko": "강제 추방하다"}, {"en": "detain", "ko": "감금하다"}, {"en": "antiseptic", "ko": "소독약"}, {"en": "subordinate", "ko": "하급자"}, {"en": "exert", "ko": "행사하다"}, {"en": "denounce", "ko": "비난하다"}, {"en": "spurn", "ko": "거절하다 rebuff turn down"}, {"en": "Boast", "ko": "자랑하다"}, {"en": "waive", "ko": "포기하다"}, {"en": "plural", "ko": "다원의"}, {"en": "tedium", "ko": "지루함"}, {"en": "epigraph", "ko": "비문"}, {"en": "platitude", "ko": "진부한 이야기"}, {"en": "over the moon", "ko": "황홀한"}, {"en": "out of the blue", "ko": "갑자기"}, {"en": "up in the air", "ko": "미정인"}, {"en": "under the weather", "ko": "몸이 안 좋은"}, {"en": "sparse", "ko": "부족한"}, {"en": "substantiate", "ko": "입증하다"}, {"en": "antecedent", "ko": "선행하는"}, {"en": "deem", "ko": "여기다"}, {"en": "meld", "ko": "혼합하다"}, {"en": "vocation", "ko": "직업"}, {"en": "apt", "ko": "하는 경향이 있는"}, {"en": "dismiss", "ko": "무시하다"}, {"en": "authentic", "ko": "진정한"}, {"en": "provoke", "ko": "일으키다"}, {"en": "prescribe", "ko": "처방하다"}, {"en": "disregard", "ko": "무시하다"}, {"en": "engender", "ko": "일으키다"}, {"en": "on the verge of", "ko": "하기 직전"}, {"en": "stagnant", "ko": "정체된"}, {"en": "stoic", "ko": "금욕적인"}, {"en": "fungus", "ko": "곰팡이"}, {"en": "eradicate", "ko": "박멸하다"}, {"en": "scourge", "ko": "재앙"}, {"en": "excavate:", "ko": "발굴하다"}, {"en": "exhume: (", "ko": "시체를) 발굴하다, 파내다"}, {"en": "sheer:", "ko": "순수한, 완전한"}, {"en": "utter:", "ko": "완전한, 입밖으로 내다"}, {"en": "constitute:", "ko": "구성하다, 설립하다"}, {"en": "haunt: (", "ko": "생각·장소가) 머릿속에 떠오르다, 괴롭히다"}, {"en": "deliberately:", "ko": "고의로, 신중하게"}, {"en": "stripped down:", "ko": "간소화된, 불필요한 것을 제거한"}, {"en": "chip away:", "ko": "조금씩 깎아내다, 야금야금 갉아먹다"}, {"en": "offend:", "ko": "기분 상하게 하다, 위반하다"}, {"en": "dweller:", "ko": "거주자, 주민"}, {"en": "convulsive:", "ko": "발작적인"}, {"en": "upend:", "ko": "거꾸로 뒤집다"}, {"en": "roam:", "ko": "돌아다니다, 배회하다"}, {"en": "terrain:", "ko": "지형, 지역"}, {"en": "creek:", "ko": "시내, 개울"}, {"en": "sedentary:", "ko": "주로 앉아서 지내는, 정주하는"}, {"en": "engrossed in: ~", "ko": "에 몰두한"}, {"en": "apathetic to: ~", "ko": "에 무관심한"}, {"en": "preoccupied with: ~", "ko": "에 사로잡힌, 몰두해 있는"}, {"en": "keep abreast of: ~", "ko": "의 최신 정보를 파악하다"}, {"en": "be acquainted with: ~", "ko": "와 잘 알다, 정통하다"}, {"en": "keep away from: ~", "ko": "을 멀리하다, 가까이 하지 않다"}, {"en": "be deported:", "ko": "추방되다"}, {"en": "emigrate:", "ko": "이주하다, 이민 가다"}, {"en": "be detained:", "ko": "구류되다, 억류되다"}, {"en": "convincingly:", "ko": "설득력 있게"}, {"en": "inadequate:", "ko": "부적절한, 불충분한"}, {"en": "increment:", "ko": "증가, 인상"}, {"en": "enormity:", "ko": "극악무도함, 엄청남"}, {"en": "momentously:", "ko": "중대하게, 중요하게"}, {"en": "subordinate:", "ko": "하위의, 부하"}, {"en": "coherent:", "ko": "일관성 있는, 논리적인"}, {"en": "put off:", "ko": "미루다, 연기하다"}, {"en": "assign:", "ko": "할당하다, 배정하다"}, {"en": "holistic:", "ko": "전체론적인, 전인적인"}, {"en": "spurn:", "ko": "퇴짜 놓다, 일언반야에 거절하다"}, {"en": "contemplate:", "ko": "심사숙고하다, 응시하다"}, {"en": "waived:", "ko": "면제된, 포기된"}, {"en": "renounced:", "ko": "포기된, 단념된"}, {"en": "bragged:", "ko": "자랑하다, 뽐내다"}, {"en": "martial:", "ko": "무도의, 군사의"}, {"en": "plural:", "ko": "복수의, 다수의"}, {"en": "witticism:", "ko": "재치 있는 말, 명언"}, {"en": "epigraph:", "ko": "제명, 비문, 인용구"}, {"en": "platitude:", "ko": "진부한 이야기, 흔하디흔한 말"}, {"en": "vigilant:", "ko": "방심하지 않는, 경계하는"}, {"en": "inconsistent:", "ko": "모순되는, 일관성 없는"}, {"en": "substantiate:", "ko": "입증하다, 증명하다"}, {"en": "authentic:", "ko": "진짜의, 진정한"}, {"en": "enterprise:", "ko": "기업, 사업"}, {"en": "attain:", "ko": "달성하다, 이루다"}, {"en": "spinoff:", "ko": "부산물, 스핀오프"}, {"en": "faulty:", "ko": "결함이 있는, 결손이 있는"}, {"en": "clense:", "ko": "정화하다, 깨끗이 하다"}, {"en": "prescribed:", "ko": "처방된, 규정된"}, {"en": "disregarded:", "ko": "무시된"}, {"en": "pluralistic:", "ko": "다원주의적인"}, {"en": "bureaucracy:", "ko": "관료주의, 관료 제도"}, {"en": "engender:", "ko": "낳다, 야기하다"}, {"en": "stoic:", "ko": "금욕적인, 극복하는"}, {"en": "fungi:", "ko": "균류, 곰팡이류"}, {"en": "planetary:", "ko": "행성의"}, {"en": "eradicate:", "ko": "근절하다, 박멸하다"}, {"en": "lineage:", "ko": "혈통, 계보"}, {"en": "taxon:", "ko": "분류군"}, {"en": "intrepid:", "ko": "용맹한, 대담한"}, {"en": "notorious:", "ko": "악명 높은"}, {"en": "lucid:", "ko": "명료한, 명백한"}, {"en": "loquacious:", "ko": "수다스러운, 말이 많은"}, {"en": "sluggish:", "ko": "느릿느릿한, 부진한"}, {"en": "placid:", "ko": "평온한, 차분한"}, {"en": "perspicuous:", "ko": "명쾌한, 명백한"}, {"en": "abolish:", "ko": "폐지하다"}, {"en": "plagiarism:", "ko": "표절"}, {"en": "initiative:", "ko": "주도권, 계획"}, {"en": "trace back:", "ko": "거슬러 올라가다"}, {"en": "flourished:", "ko": "번창하다, 번성하다"}, {"en": "harnessed:", "ko": "이용하다, 활용하다"}, {"en": "beat a retreat:", "ko": "후퇴하다, 물러나다"}, {"en": "futile:", "ko": "헛된, 소용없는"}, {"en": "discarded:", "ko": "버려진"}, {"en": "perish:", "ko": "죽다, 소멸하다"}, {"en": "coarse:", "ko": "거친, 굵은"}, {"en": "preceded:", "ko": "선행하는, 앞서 일어난"}, {"en": "prudence:", "ko": "신중, 조심"}, {"en": "equity:", "ko": "공평, 공정, 자기자본"}, {"en": "transaction:", "ko": "거래, 매매"}, {"en": "Dispute", "ko": "반박하다"}, {"en": "derogatory", "ko": "경멸적인"}, {"en": "mandatory", "ko": "의무적인"}, {"en": "redundant", "ko": "불필요한"}, {"en": "pejorative", "ko": "경멸적인"}, {"en": "rule out", "ko": "배제하다"}, {"en": "alleged", "ko": "의심받는"}, {"en": "curtail", "ko": "삭감하다"}, {"en": "hover", "ko": "맴돌다"}, {"en": "aggravate", "ko": "약화시키다"}, {"en": "eradicate", "ko": "근절하다"}, {"en": "template", "ko": "본보기"}, {"en": "inquiry", "ko": "조사"}, {"en": "commotion", "ko": "소동"}, {"en": "emerge", "ko": "나타내다"}, {"en": "embark on", "ko": "에 착수하다"}, {"en": "confrontational", "ko": "대립적인"}, {"en": "yet another", "ko": "잇따라"}, {"en": "implication", "ko": "의미"}, {"en": "Mark up", "ko": "가격인상"}, {"en": "claim to fame", "ko": "유명한 이유"}, {"en": "wield", "ko": "행사하다"}, {"en": "lash out", "ko": "강타하다"}, {"en": "subterranean", "ko": "지하의"}, {"en": "conscientious", "ko": "성실한, 양심적인"}, {"en": "setback", "ko": "실패"}, {"en": "sidestep", "ko": "피하다"}, {"en": "do thorough", "ko": "빈틈없이 하다"}, {"en": "underpin", "ko": "뒷받침하다"}, {"en": "viable", "ko": "성공할 수 있는"}, {"en": "perpetrator", "ko": "가해자"}, {"en": "depraved", "ko": "타락한"}, {"en": "atrocity", "ko": "잔혹 행위"}, {"en": "accountability", "ko": "책임"}, {"en": "comprise", "ko": "구성하다"}, {"en": "manifest", "ko": "드러내다"}, {"en": "nocturnal", "ko": "야행성의"}, {"en": "muzzle", "ko": "억압하다"}, {"en": "assert", "ko": "주장하다"}, {"en": "declare", "ko": "선언하다"}, {"en": "pompous", "ko": "거만한"}, {"en": "presumptuous", "ko": "거만한"}, {"en": "genuine", "ko": "진실의"}, {"en": "colloquial", "ko": "구어의"}, {"en": "call it a day", "ko": "끝내다"}, {"en": "province", "ko": "지방"}, {"en": "coercive", "ko": "고압적인"}, {"en": "extensive", "ko": "광범위한"}, {"en": "aversive", "ko": "혐오의"}, {"en": "elicit", "ko": "이끌어 내다"}, {"en": "perpetuate", "ko": "영속시키다"}, {"en": "attenuate", "ko": "약화시키다"}, {"en": "abhor", "ko": "혐오하다"}, {"en": "pious", "ko": "신앙심이 깊은"}, {"en": "orthodox", "ko": "정통파의"}, {"en": "react against", "ko": "반발하다"}, {"en": "Retain", "ko": "간직하다"}, {"en": "doctrinaire", "ko": "광신적인"}, {"en": "cut back", "ko": "축소하다"}, {"en": "surly", "ko": "불친절한"}, {"en": "wear and tear", "ko": "손상"}, {"en": "prerequisite", "ko": "필요 조건"}, {"en": "fertilization", "ko": "수정"}, {"en": "pollination", "ko": "수분"}, {"en": "indispensable", "ko": "필수적인"}, {"en": "omnipresent", "ko": "어디에나 있는"}, {"en": "imperative", "ko": "필수적인"}, {"en": "conform", "ko": "순응하다"}, {"en": "deplorable", "ko": "한탄스러운"}, {"en": "cumbersome", "ko": "불편한"}, {"en": "harbinger", "ko": "선구자"}, {"en": "reckless", "ko": "분별없는"}, {"en": "exploitation", "ko": "개발"}, {"en": "run down", "ko": "황폐한"}, {"en": "rodent", "ko": "설치류"}, {"en": "buttressed", "ko": "지지를 받은"}, {"en": "disregard", "ko": "외면하다"}, {"en": "foster", "ko": "위탁 양육하다"}, {"en": "in need", "ko": "가난한"}, {"en": "diurnal", "ko": "주행성의"}, {"en": "lure", "ko": "유인하다"}, {"en": "impose", "ko": "강요하다"}, {"en": "blatant", "ko": "뻔뻔스러운"}, {"en": "breach", "ko": "위반"}, {"en": "referenda", "ko": "국민 투표"}, {"en": "consensus", "ko": "합의"}, {"en": "in terms of", "ko": "의 면에서"}, {"en": "dictatorship", "ko": "독재 정권"}, {"en": "Non intervention", "ko": "불간섭"}];
+
+    /* ========================================================
+       2. WEB AUDIO API SYNTHESIZER (Mobile-Safe)
+       ======================================================== */
+    class SoundEngine {
+      constructor() {
+        this.ctx = null;
+        this.enabled = true;
+      }
+      init() {
+        try {
+          if (!this.ctx) {
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            if (AudioContext) {
+              this.ctx = new AudioContext();
+            }
+          }
+          if (this.ctx && this.ctx.state === 'suspended') {
+            this.ctx.resume().catch(() => {});
+          }
+        } catch (e) {
+          console.warn('Web Audio not available or restricted:', e);
+        }
+      }
+      playCorrect() {
+        if (!this.enabled) return;
+        try {
+          this.init();
+          if (!this.ctx) return;
+          const now = this.ctx.currentTime;
+          const osc1 = this.ctx.createOscillator();
+          const osc2 = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+
+          osc1.type = 'triangle';
+          osc2.type = 'sine';
+          osc1.frequency.setValueAtTime(523.25, now);
+          osc1.frequency.setValueAtTime(659.25, now + 0.1);
+          osc2.frequency.setValueAtTime(783.99, now + 0.1);
+
+          gain.gain.setValueAtTime(0.18, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
+
+          osc1.connect(gain);
+          osc2.connect(gain);
+          gain.connect(this.ctx.destination);
+
+          osc1.start(now);
+          osc2.start(now + 0.1);
+          osc1.stop(now + 0.45);
+          osc2.stop(now + 0.45);
+        } catch (e) {}
+      }
+      playWrong() {
+        if (!this.enabled) return;
+        try {
+          this.init();
+          if (!this.ctx) return;
+          const now = this.ctx.currentTime;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(180, now);
+          osc.frequency.linearRampToValueAtTime(130, now + 0.3);
+
+          gain.gain.setValueAtTime(0.2, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+
+          osc.start(now);
+          osc.stop(now + 0.35);
+        } catch (e) {}
+      }
+      playFanfare() {
+        if (!this.enabled) return;
+        try {
+          this.init();
+          if (!this.ctx) return;
+          const notes = [523.25, 659.25, 783.99, 1046.50];
+          notes.forEach((freq, idx) => {
+            const now = this.ctx.currentTime + idx * 0.12;
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(freq, now);
+            gain.gain.setValueAtTime(0.2, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start(now);
+            osc.stop(now + 0.4);
+          });
+        } catch (e) {}
+      }
+      playClick() {
+        if (!this.enabled) return;
+        try {
+          this.init();
+          if (!this.ctx) return;
+          const now = this.ctx.currentTime;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(800, now);
+          gain.gain.setValueAtTime(0.05, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.05);
+        } catch (e) {}
+      }
+    }
+    const sound = new SoundEngine();
+
+    /* ========================================================
+       3. SPEECH SYNTHESIS (TTS)
+       ======================================================== */
+    function speakText(text) {
+      try {
+        if (!('speechSynthesis' in window)) return;
+        window.speechSynthesis.cancel();
+        const clean = text.replace(/[^a-zA-Z\s]/g, '').trim();
+        if (!clean) return;
+        const utterance = new SpeechSynthesisUtterance(clean);
+        utterance.lang = 'en-US';
+        utterance.rate = 0.9;
+        window.speechSynthesis.speak(utterance);
+      } catch (e) {}
+    }
+
+    /* ========================================================
+       4. CONFETTI PARTICLES (Pure Canvas Animation)
+       ======================================================== */
+    const canvas = document.getElementById('confetti-canvas');
+    const ctx = canvas.getContext('2d');
+    let confettiParticles = [];
+    let confettiAnimationId = null;
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    function triggerConfetti() {
+      confettiParticles = [];
+      const colors = ['#3b82f6', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6'];
+      for (let i = 0; i < 90; i++) {
+        confettiParticles.push({
+          x: canvas.width / 2,
+          y: canvas.height * 0.4,
+          r: Math.random() * 6 + 4,
+          d: Math.random() * 90,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          vx: (Math.random() - 0.5) * 16,
+          vy: (Math.random() - 0.7) * 16,
+          tilt: Math.random() * 10,
+          tiltAngleIncremental: (Math.random() * 0.07) + 0.05,
+          tiltAngle: 0
+        });
+      }
+      if (confettiAnimationId) cancelAnimationFrame(confettiAnimationId);
+      animateConfetti();
+    }
+
+    function animateConfetti() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      let stillActive = false;
+      confettiParticles.forEach(p => {
+        p.tiltAngle += p.tiltAngleIncremental;
+        p.vy += 0.35; // gravity
+        p.x += p.vx;
+        p.y += p.vy;
+        p.tilt = Math.sin(p.tiltAngle) * 12;
+
+        if (p.y < canvas.height) stillActive = true;
+
+        ctx.beginPath();
+        ctx.lineWidth = p.r / 2;
+        ctx.strokeStyle = p.color;
+        ctx.moveTo(p.x + p.tilt + p.r, p.y);
+        ctx.lineTo(p.x + p.tilt, p.y + p.tilt + p.r);
+        ctx.stroke();
+      });
+
+      if (stillActive) {
+        confettiAnimationId = requestAnimationFrame(animateConfetti);
+      } else {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
+    }
+
+    /* ========================================================
+       5. APPLICATION STATE & STORAGE
+       ======================================================== */
+    /* ========================================================
+       5. SAFE STORAGE (Mobile / In-App WebView / Private Mode Fallback)
+       ======================================================== */
+    const safeStorage = {
+      memory: {},
+      getItem(key) {
+        try {
+          if (typeof window !== 'undefined' && window.localStorage) {
+            const val = window.localStorage.getItem(key);
+            if (val !== null) return val;
+          }
+        } catch (e) {
+          console.warn('localStorage read fallback:', e);
+        }
+        return this.memory[key] !== undefined ? this.memory[key] : null;
+      },
+      setItem(key, val) {
+        try {
+          if (typeof window !== 'undefined' && window.localStorage) {
+            window.localStorage.setItem(key, val);
+            return;
+          }
+        } catch (e) {
+          console.warn('localStorage write fallback:', e);
+        }
+        this.memory[key] = String(val);
+      },
+      removeItem(key) {
+        try {
+          if (typeof window !== 'undefined' && window.localStorage) {
+            window.localStorage.removeItem(key);
+          }
+        } catch (e) {}
+        delete this.memory[key];
+      }
+    };
+
+    const STORAGE_KEYS = {
+      WORDS: 'vocamaster_words_v1',
+      WRONG_NOTES: 'vocamaster_wrong_notes_v1',
+      ATTENDANCE: 'vocamaster_attendance_v1',
+      THEME: 'vocamaster_theme_v1',
+      SOUND: 'vocamaster_sound_v1'
+    };
+
+    const state = {
+      words: [],
+      wrongNotes: [],
+      attendance: { dates: [], streak: 0, lastDate: '' },
+      theme: 'light',
+      soundEnabled: true,
+      importMode: 'replace', // 'replace' or 'append'
+      // Quiz runtime
+      quiz: {
+        mode: 'en-to-ko',
+        targetCount: 30,
+        questions: [],
+        currentIndex: 0,
+        correctCount: 0,
+        wrongCount: 0,
+        answered: false,
+        startTime: null,
+        sessionWrongs: [],
+        sessionHistory: []
+      },
+      // Flashcard runtime
+      flashcardIndex: 0,
+      flashcardFlipped: false,
+      // Calendar navigation runtime
+      calYear: new Date().getFullYear(),
+      calMonth: new Date().getMonth()
+    };
+
+    function showToast(msg) {
+      try {
+        const toast = document.getElementById('toast-message');
+        if (toast) {
+          toast.textContent = msg;
+          toast.classList.add('show');
+          setTimeout(() => toast.classList.remove('show'), 2200);
+        }
+      } catch (e) {}
+    }
+
+    function loadState() {
+      // Words
+      try {
+        const savedWords = safeStorage.getItem(STORAGE_KEYS.WORDS);
+        if (savedWords) {
+          state.words = JSON.parse(savedWords);
+        } else {
+          state.words = [...DEFAULT_WORDS];
+          safeStorage.setItem(STORAGE_KEYS.WORDS, JSON.stringify(state.words));
+        }
+      } catch (e) {
+        state.words = [...DEFAULT_WORDS];
+      }
+
+      // Wrong Notes
+      try {
+        const savedNotes = safeStorage.getItem(STORAGE_KEYS.WRONG_NOTES);
+        state.wrongNotes = savedNotes ? JSON.parse(savedNotes) : [];
+      } catch (e) {
+        state.wrongNotes = [];
+      }
+
+      // Attendance
+      try {
+        const savedAtt = safeStorage.getItem(STORAGE_KEYS.ATTENDANCE);
+        state.attendance = savedAtt ? JSON.parse(savedAtt) : { dates: [], streak: 0, lastDate: '' };
+      } catch (e) {
+        state.attendance = { dates: [], streak: 0, lastDate: '' };
+      }
+
+      // Theme
+      try {
+        const savedTheme = safeStorage.getItem(STORAGE_KEYS.THEME) || 'light';
+        setTheme(savedTheme);
+      } catch (e) {
+        setTheme('light');
+      }
+
+      // Sound
+      try {
+        const savedSound = safeStorage.getItem(STORAGE_KEYS.SOUND);
+        state.soundEnabled = savedSound !== 'false';
+        sound.enabled = state.soundEnabled;
+        updateSoundButtonUI();
+      } catch (e) {
+        state.soundEnabled = true;
+        sound.enabled = true;
+      }
+    }
+
+    function saveWords() {
+      try {
+        safeStorage.setItem(STORAGE_KEYS.WORDS, JSON.stringify(state.words));
+      } catch (e) {}
+    }
+
+    function saveWrongNotes() {
+      try {
+        safeStorage.setItem(STORAGE_KEYS.WRONG_NOTES, JSON.stringify(state.wrongNotes));
+        updateWrongNoteBadges();
+      } catch (e) {}
+    }
+
+    function saveAttendance() {
+      try {
+        safeStorage.setItem(STORAGE_KEYS.ATTENDANCE, JSON.stringify(state.attendance));
+      } catch (e) {}
+    }
+
+    function setTheme(theme) {
+      try {
+        state.theme = theme;
+        document.documentElement.setAttribute('data-theme', theme);
+        const btn = document.getElementById('btn-theme-toggle');
+        if (btn) btn.textContent = theme === 'dark' ? '☀️' : '🌙';
+        safeStorage.setItem(STORAGE_KEYS.THEME, theme);
+      } catch (e) {}
+    }
+
+    function updateSoundButtonUI() {
+      try {
+        const btn = document.getElementById('btn-sound-toggle');
+        if (btn) btn.textContent = state.soundEnabled ? '🔊' : '🔇';
+      } catch (e) {}
+    }
+
+    /* ========================================================
+       6. DAILY ATTENDANCE SYSTEM
+       ======================================================== */
+    function getTodayString() {
+      const now = new Date();
+      const y = now.getFullYear();
+      const m = String(now.getMonth() + 1).padStart(2, '0');
+      const d = String(now.getDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
+    }
+
+    function renderAttendanceUI(justStamped = false) {
+      const today = getTodayString();
+      const now = new Date();
+      const daysKor = ['일', '월', '화', '수', '목', '금', '토'];
+      const dateDisplay = `${now.getFullYear()}년 ${now.getMonth() + 1}월 ${now.getDate()}일 ${daysKor[now.getDay()]}요일`;
+      document.getElementById('display-today-date').textContent = dateDisplay;
+
+      const hasAttendedToday = state.attendance.dates.includes(today);
+      const btn = document.getElementById('btn-do-attendance');
+      const streakBadge = document.getElementById('display-streak-badge');
+
+      streakBadge.textContent = `🔥 ${state.attendance.streak}일 연속`;
+
+      if (hasAttendedToday) {
+        btn.className = 'btn-attendance checked';
+        btn.innerHTML = '<span>💮 오늘 출석 도장 완료!</span>';
+        document.getElementById('cal-today-status-text').textContent = '오늘 출석 완료 ✓';
+      } else {
+        btn.className = 'btn-attendance not-checked';
+        btn.innerHTML = '<span>💮 오늘 출석 도장 찍기</span>';
+        document.getElementById('cal-today-status-text').textContent = '오늘 출석 전';
+      }
+
+      // Render Monthly Calendar
+      const calYear = state.calYear;
+      const calMonth = state.calMonth; // 0-indexed
+      document.getElementById('cal-month-title').textContent = `📅 ${calYear}년 ${calMonth + 1}월`;
+
+      const grid = document.getElementById('attendance-calendar-grid');
+      grid.innerHTML = '';
+
+      // Weekday headers
+      const weekDays = [
+        { label: '일', cls: 'sun' },
+        { label: '월', cls: '' },
+        { label: '화', cls: '' },
+        { label: '수', cls: '' },
+        { label: '목', cls: '' },
+        { label: '금', cls: '' },
+        { label: '토', cls: 'sat' }
+      ];
+      weekDays.forEach(w => {
+        const h = document.createElement('div');
+        h.className = `calendar-weekday ${w.cls}`;
+        h.textContent = w.label;
+        grid.appendChild(h);
+      });
+
+      // First day of month & total days
+      const firstDayIndex = new Date(calYear, calMonth, 1).getDay(); // 0(Sun) - 6(Sat)
+      const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+
+      // Empty padding cells before 1st
+      for (let i = 0; i < firstDayIndex; i++) {
+        const emptyCell = document.createElement('div');
+        emptyCell.className = 'calendar-day-cell empty';
+        grid.appendChild(emptyCell);
+      }
+
+      let monthAttendedCount = 0;
+
+      // Month days
+      for (let day = 1; day <= daysInMonth; day++) {
+        const mStr = String(calMonth + 1).padStart(2, '0');
+        const dStr = String(day).padStart(2, '0');
+        const dateKey = `${calYear}-${mStr}-${dStr}`;
+        const dayOfWeek = new Date(calYear, calMonth, day).getDay();
+
+        const isAttended = state.attendance.dates.includes(dateKey);
+        const isToday = (dateKey === today);
+        if (isAttended) monthAttendedCount++;
+
+        const cell = document.createElement('div');
+        let dayCls = 'calendar-day-cell';
+        if (dayOfWeek === 0) dayCls += ' sun';
+        if (dayOfWeek === 6) dayCls += ' sat';
+        if (isToday) dayCls += ' today';
+        cell.className = dayCls;
+
+        cell.innerHTML = `<span class="calendar-day-num">${day}</span>`;
+
+        if (isAttended) {
+          const stamp = document.createElement('div');
+          stamp.className = 'calendar-stamp';
+          if (justStamped && isToday) {
+            stamp.classList.add('just-stamped');
+          }
+          stamp.innerHTML = '<span class="calendar-stamp-star">★</span>';
+          cell.appendChild(stamp);
+        }
+
+        grid.appendChild(cell);
+      }
+
+      document.getElementById('cal-month-count').textContent = monthAttendedCount;
+    }
+
+    function checkAttendance() {
+      const today = getTodayString();
+      if (state.attendance.dates.includes(today)) {
+        showToast('이미 오늘 출석 체크를 완료했습니다! 👍');
+        return;
+      }
+
+      sound.playFanfare();
+      triggerConfetti();
+
+      // Check yesterday to increment streak
+      const yesterdayDate = new Date();
+      yesterdayDate.setDate(yesterdayDate.getDate() - 1);
+      const yStr = yesterdayDate.getFullYear();
+      const mStr = String(yesterdayDate.getMonth() + 1).padStart(2, '0');
+      const dStr = String(yesterdayDate.getDate()).padStart(2, '0');
+      const yesterday = `${yStr}-${mStr}-${dStr}`;
+
+      if (state.attendance.lastDate === yesterday) {
+        state.attendance.streak += 1;
+      } else {
+        state.attendance.streak = 1;
+      }
+
+      state.attendance.dates.push(today);
+      state.attendance.lastDate = today;
+      saveAttendance();
+
+      // Make sure we are viewing the current month to show the stamp
+      const now = new Date();
+      state.calYear = now.getFullYear();
+      state.calMonth = now.getMonth();
+
+      renderAttendanceUI(true);
+      showToast(`출석 도장 쾅! ${state.attendance.streak}일 연속 달성 🎉`);
+    }
+
+    /* ========================================================
+       7. FILE PARSING & DATA IMPORT / EXPORT
+       ======================================================== */
+    function parseWordText(text) {
+      const lines = text.split(/\r?\n/);
+      const result = [];
+      const hangulRegex = /[\uac00-\ud7a3]/;
+
+      for (let rawLine of lines) {
+        let line = rawLine.trim().replace(/&#x20;/g, ' ').replace(/\~/g, '~').trim();
+        if (!line) continue;
+
+        // Transition detection: find first Korean character
+        const match = hangulRegex.exec(line);
+        if (match) {
+          const korIdx = match.index;
+          const eng = line.substring(0, korIdx).trim();
+          const kor = line.substring(korIdx).trim();
+          if (eng && kor) {
+            result.push({ en: eng, ko: kor });
+            continue;
+          }
+        }
+
+        // Fallback: split by first space or tab
+        const tabParts = line.split('	');
+        if (tabParts.length >= 2 && tabParts[0].trim() && tabParts[1].trim()) {
+          result.push({ en: tabParts[0].trim(), ko: tabParts[1].trim() });
+          continue;
+        }
+
+        const spaceIdx = line.indexOf(' ');
+        if (spaceIdx > 0) {
+          const eng = line.substring(0, spaceIdx).trim();
+          const kor = line.substring(spaceIdx + 1).trim();
+          if (eng && kor) {
+            result.push({ en: eng, ko: kor });
+          }
+        }
+      }
+      return result;
+    }
+
+    function handleImportedWords(parsedWords) {
+      if (!parsedWords || parsedWords.length === 0) {
+        alert('올바른 단어 데이터를 찾을 수 없습니다. txt 파일의 형식(영단어와 한글 뜻)을 확인해주세요.');
+        return;
+      }
+
+      if (state.importMode === 'replace') {
+        state.words = parsedWords;
+        showToast(`단어장 교체 완료: 총 ${parsedWords.length}개 단어`);
+      } else {
+        // Append avoiding duplicate english words
+        const existingMap = new Set(state.words.map(w => w.en.toLowerCase()));
+        let addedCount = 0;
+        parsedWords.forEach(w => {
+          if (!existingMap.has(w.en.toLowerCase())) {
+            state.words.push(w);
+            existingMap.add(w.en.toLowerCase());
+            addedCount++;
+          }
+        });
+        showToast(`단어 추가 완료: ${addedCount}개 추가 (총 ${state.words.length}개)`);
+      }
+
+      saveWords();
+      renderVocabList();
+      updateWrongNoteBadges();
+    }
+
+    function exportWordsToTxt() {
+      if (state.words.length === 0) {
+        showToast('내보낼 단어가 없습니다.');
+        return;
+      }
+      const lines = state.words.map(w => `${w.en} ${w.ko}`);
+      const blob = new Blob([lines.join('\n\n')], { type: 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `vocamaster_words_${getTodayString()}.txt`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast('단어장 파일이 다운로드되었습니다.');
+    }
+
+    /* ========================================================
+       8. QUIZ ENGINE & MULTIPLE CHOICE LOGIC
+       ======================================================== */
+    function shuffleArray(array) {
+      const arr = [...array];
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    function prepareQuizQuestions(wrongOnly = false) {
+      if (state.words.length < 5) {
+        alert('퀴즈를 진행하려면 최소 5개 이상의 단어가 필요합니다.');
+        return null;
+      }
+
+      let questionPool = [];
+      const totalRequested = wrongOnly ? state.wrongNotes.length : state.quiz.targetCount;
+
+      if (wrongOnly) {
+        if (state.wrongNotes.length === 0) {
+          showToast('오답노트에 단어가 없습니다.');
+          return null;
+        }
+        questionPool = shuffleArray(state.wrongNotes);
+      } else {
+        // Priority to wrong answers
+        const wrongWords = state.wrongNotes.map(n => ({ en: n.en, ko: n.ko, isFromWrongNote: true }));
+        const wrongShuffled = shuffleArray(wrongWords);
+
+        // Include wrong notes first (up to targetCount)
+        const chosenWrong = wrongShuffled.slice(0, totalRequested);
+        const chosenSet = new Set(chosenWrong.map(w => w.en.toLowerCase()));
+
+        // Fill remainder with random words from total pool
+        const remainingCandidates = state.words.filter(w => !chosenSet.has(w.en.toLowerCase()));
+        const remainderShuffled = shuffleArray(remainingCandidates);
+        const needed = totalRequested - chosenWrong.length;
+        const chosenRemaining = remainderShuffled.slice(0, Math.max(0, needed));
+
+        questionPool = shuffleArray([...chosenWrong, ...chosenRemaining]);
+      }
+
+      // Generate 5-choice questions
+      const questions = questionPool.map(targetWord => {
+        let qMode = state.quiz.mode;
+        if (qMode === 'mixed') {
+          qMode = Math.random() < 0.5 ? 'en-to-ko' : 'ko-to-en';
+        }
+
+        const isEnToKo = (qMode === 'en-to-ko');
+        const promptText = isEnToKo ? targetWord.en : targetWord.ko;
+        const correctText = isEnToKo ? targetWord.ko : targetWord.en;
+
+        // Distractors: 4 unique other choices from total words
+        const distractorPool = state.words
+          .filter(w => w.en.toLowerCase() !== targetWord.en.toLowerCase())
+          .map(w => isEnToKo ? w.ko : w.en);
+
+        const uniqueDistractors = [...new Set(distractorPool)];
+        const shuffledDistractors = shuffleArray(uniqueDistractors).slice(0, 4);
+
+        // Combine correct + 4 distractors & shuffle
+        const allOptions = shuffleArray([
+          { text: correctText, isCorrect: true },
+          ...shuffledDistractors.map(d => ({ text: d, isCorrect: false }))
+        ]);
+
+        return {
+          word: targetWord,
+          mode: qMode,
+          prompt: promptText,
+          correctAnswer: correctText,
+          options: allOptions
+        };
+      });
+
+      return questions;
+    }
+
+    function startQuiz(wrongOnly = false) {
+      const questions = prepareQuizQuestions(wrongOnly);
+      if (!questions || questions.length === 0) return;
+
+      state.quiz.questions = questions;
+      state.quiz.currentIndex = 0;
+      state.quiz.correctCount = 0;
+      state.quiz.wrongCount = 0;
+      state.quiz.answered = false;
+      state.quiz.startTime = Date.now();
+      state.quiz.sessionWrongs = [];
+      state.quiz.sessionHistory = [];
+
+      document.getElementById('quiz-setup-screen').style.display = 'none';
+      document.getElementById('quiz-result-screen').style.display = 'none';
+      document.getElementById('quiz-active-screen').style.display = 'block';
+
+      renderCurrentQuestion();
+    }
+
+    function renderCurrentQuestion() {
+      const q = state.quiz.questions[state.quiz.currentIndex];
+      const total = state.quiz.questions.length;
+      state.quiz.answered = false;
+
+      // Progress & Info
+      const progressPercent = ((state.quiz.currentIndex) / total) * 100;
+      document.getElementById('quiz-progress-fill').style.width = `${progressPercent}%`;
+      document.getElementById('quiz-step-display').textContent = `문제 ${state.quiz.currentIndex + 1} / ${total}`;
+      document.getElementById('quiz-live-correct').textContent = state.quiz.correctCount;
+      document.getElementById('quiz-live-wrong').textContent = state.quiz.wrongCount;
+
+      // Mode Tag
+      const modeTag = document.getElementById('question-mode-tag');
+      modeTag.textContent = q.mode === 'en-to-ko' ? '영단어 ➔ 한글 뜻' : '한글 뜻 ➔ 영단어';
+
+      // Question Prompt
+      const questionText = document.getElementById('question-text');
+      questionText.textContent = q.prompt;
+
+      // TTS Button
+      const ttsBtn = document.getElementById('question-tts-btn');
+      if (q.mode === 'en-to-ko') {
+        ttsBtn.style.display = 'inline-flex';
+        ttsBtn.onclick = (e) => {
+          e.stopPropagation();
+          speakText(q.prompt);
+        };
+      } else {
+        ttsBtn.style.display = 'none';
+      }
+
+      // Render 5 Choice Buttons
+      const choicesContainer = document.getElementById('choices-container');
+      choicesContainer.innerHTML = '';
+
+      q.options.forEach((opt, idx) => {
+        const btn = document.createElement('button');
+        btn.className = 'choice-btn';
+        btn.dataset.index = idx;
+        btn.innerHTML = `
+          <div class="choice-num">${idx + 1}</div>
+          <div class="choice-text">${opt.text}</div>
+          <div class="choice-indicator">${opt.isCorrect ? '✓' : '✗'}</div>
+        `;
+
+        btn.addEventListener('click', () => handleChoiceSelect(idx, btn, opt));
+        choicesContainer.appendChild(btn);
+      });
+    }
+
+    function handleChoiceSelect(choiceIdx, clickedBtn, selectedOpt) {
+      if (state.quiz.answered) return;
+      state.quiz.answered = true;
+
+      const currentQ = state.quiz.questions[state.quiz.currentIndex];
+      const isCorrect = selectedOpt.isCorrect;
+      const allButtons = document.querySelectorAll('.choice-btn');
+
+      // Disable all choice buttons
+      allButtons.forEach(btn => btn.disabled = true);
+
+      // Record result
+      if (isCorrect) {
+        state.quiz.correctCount++;
+        clickedBtn.classList.add('correct');
+        sound.playCorrect();
+
+        // Requirement: If this word was in wrong notes, auto-remove upon correct answer!
+        removeWordFromWrongNotes(currentQ.word.en);
+      } else {
+        state.quiz.wrongCount++;
+        clickedBtn.classList.add('incorrect');
+        sound.playWrong();
+
+        // Highlight the correct answer in green
+        allButtons.forEach(btn => {
+          const idx = parseInt(btn.dataset.index, 10);
+          if (currentQ.options[idx].isCorrect) {
+            btn.classList.add('correct');
+          }
+        });
+
+        // Add to wrong notes
+        addWordToWrongNotes(currentQ.word);
+        state.quiz.sessionWrongs.push(currentQ.word);
+      }
+
+      // Update live counters
+      document.getElementById('quiz-live-correct').textContent = state.quiz.correctCount;
+      document.getElementById('quiz-live-wrong').textContent = state.quiz.wrongCount;
+
+      state.quiz.sessionHistory.push({
+        word: currentQ.word,
+        isCorrect: isCorrect,
+        userPick: selectedOpt.text,
+        correctPick: currentQ.correctAnswer
+      });
+
+      // 0.65s visual feedback then proceed to next question
+      setTimeout(() => {
+        if (state.quiz.currentIndex + 1 < state.quiz.questions.length) {
+          state.quiz.currentIndex++;
+          renderCurrentQuestion();
+        } else {
+          finishQuiz();
+        }
+      }, 650);
+    }
+
+    function finishQuiz() {
+      document.getElementById('quiz-active-screen').style.display = 'none';
+      document.getElementById('quiz-result-screen').style.display = 'block';
+
+      const total = state.quiz.questions.length;
+      const correct = state.quiz.correctCount;
+      const wrong = state.quiz.wrongCount;
+      const percent = Math.round((correct / total) * 100);
+
+      // Time taken
+      const elapsedSec = Math.max(1, Math.round((Date.now() - state.quiz.startTime) / 1000));
+      const min = Math.floor(elapsedSec / 60);
+      const sec = elapsedSec % 60;
+      const timeStr = min > 0 ? `${min}분 ${sec}초` : `${sec}초`;
+
+      document.getElementById('result-percent').textContent = `${percent}%`;
+      document.getElementById('result-fraction').textContent = `${correct} / ${total} 문제 정답`;
+      document.getElementById('result-correct-count').textContent = correct;
+      document.getElementById('result-wrong-count').textContent = wrong;
+      document.getElementById('result-time-taken').textContent = timeStr;
+
+      // Grade badge
+      const badge = document.getElementById('result-feedback-badge');
+      if (percent === 100) {
+        badge.className = 'result-feedback-badge badge-excellent';
+        badge.textContent = '🏆 만점 달성! 완벽합니다!';
+        sound.playFanfare();
+        triggerConfetti();
+      } else if (percent >= 80) {
+        badge.className = 'result-feedback-badge badge-good';
+        badge.textContent = '🌟 훌륭해요! 거의 다 맞혔습니다!';
+        sound.playFanfare();
+      } else if (percent >= 60) {
+        badge.className = 'result-feedback-badge badge-fair';
+        badge.textContent = '👍 좋은 시도예요! 오답을 조금 더 복습해봐요.';
+      } else {
+        badge.className = 'result-feedback-badge badge-poor';
+        badge.textContent = '💪 포기하지 마세요! 반복 학습이 최고입니다.';
+      }
+
+      // Retry wrong only button
+      const retryWrongsBtn = document.getElementById('btn-retry-wrongs');
+      if (wrong > 0) {
+        retryWrongsBtn.style.display = 'block';
+        retryWrongsBtn.onclick = () => {
+          state.quiz.targetCount = wrong;
+          startQuiz(true);
+        };
+      } else {
+        retryWrongsBtn.style.display = 'none';
+      }
+
+      // Render review items
+      const reviewContainer = document.getElementById('result-review-items');
+      reviewContainer.innerHTML = '';
+      state.quiz.sessionHistory.forEach(item => {
+        const row = document.createElement('div');
+        row.className = `review-item ${item.isCorrect ? 'is-correct' : 'is-wrong'}`;
+        row.innerHTML = `
+          <div>
+            <div class="review-word-en">${item.word.en}</div>
+            <div class="review-word-ko">${item.word.ko}</div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <button class="btn-sm-icon" onclick="speakText('${item.word.en}')" title="발음 듣기">🔊</button>
+            <span style="font-size: 0.82rem; font-weight: 700; color: ${item.isCorrect ? 'var(--success)' : 'var(--error)'};">
+              ${item.isCorrect ? '정답 ✓' : '오답 ✗'}
+            </span>
+          </div>
+        `;
+        reviewContainer.appendChild(row);
+      });
+    }
+
+    /* ========================================================
+       9. WRONG ANSWER NOTE MANAGEMENT
+       ======================================================== */
+    function addWordToWrongNotes(word) {
+      const idx = state.wrongNotes.findIndex(n => n.en.toLowerCase() === word.en.toLowerCase());
+      if (idx >= 0) {
+        state.wrongNotes[idx].wrongCount = (state.wrongNotes[idx].wrongCount || 1) + 1;
+        state.wrongNotes[idx].lastWrongDate = getTodayString();
+      } else {
+        state.wrongNotes.unshift({
+          en: word.en,
+          ko: word.ko,
+          wrongCount: 1,
+          lastWrongDate: getTodayString()
+        });
+      }
+      saveWrongNotes();
+      renderWrongNotesList();
+    }
+
+    function removeWordFromWrongNotes(enWord) {
+      const initialLen = state.wrongNotes.length;
+      state.wrongNotes = state.wrongNotes.filter(n => n.en.toLowerCase() !== enWord.toLowerCase());
+      if (state.wrongNotes.length !== initialLen) {
+        saveWrongNotes();
+        renderWrongNotesList();
+      }
+    }
+
+    function updateWrongNoteBadges() {
+      const count = state.wrongNotes.length;
+      document.getElementById('tab-wrong-count').textContent = count;
+      document.getElementById('wrong-total-display').textContent = count;
+
+      const wrongOnlyBtn = document.getElementById('btn-start-wrong-only');
+      const wrongCountSpan = document.getElementById('wrong-only-count');
+      const quizFromWrongBtn = document.getElementById('btn-quiz-from-wrong-tab');
+
+      if (count > 0) {
+        wrongOnlyBtn.style.display = 'block';
+        wrongCountSpan.textContent = count;
+        quizFromWrongBtn.style.display = 'block';
+      } else {
+        wrongOnlyBtn.style.display = 'none';
+        quizFromWrongBtn.style.display = 'none';
+      }
+    }
+
+    function renderWrongNotesList(filterQuery = '') {
+      const container = document.getElementById('wrong-items-container');
+      const query = filterQuery.toLowerCase().trim();
+
+      const filtered = state.wrongNotes.filter(item => {
+        if (!query) return true;
+        return item.en.toLowerCase().includes(query) || item.ko.toLowerCase().includes(query);
+      });
+
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon">🎉</div>
+            <div class="empty-text">${query ? '검색된 오답 단어가 없습니다.' : '오답노트가 깨끗하게 비어있습니다!'}</div>
+            <div class="empty-subtext">퀴즈에서 틀린 단어가 생기면 이곳에 자동으로 저장됩니다.</div>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = '';
+      filtered.forEach(item => {
+        const row = document.createElement('div');
+        row.className = 'vocab-item';
+        row.innerHTML = `
+          <div class="vocab-info">
+            <div class="vocab-en">
+              ${item.en}
+              <span style="font-size: 0.72rem; padding: 2px 6px; border-radius: var(--radius-full); background-color: var(--error-soft); color: var(--error);">
+                ${item.wrongCount || 1}회 오답
+              </span>
+            </div>
+            <div class="vocab-ko">${item.ko}</div>
+          </div>
+          <div class="vocab-actions">
+            <button class="btn-sm-icon" onclick="speakText('${item.en}')" title="발음 듣기">🔊</button>
+            <button class="btn-sm-icon btn-delete-wrong" title="외움 (오답노트에서 삭제)">외움 ✓</button>
+          </div>
+        `;
+
+        row.querySelector('.btn-delete-wrong').addEventListener('click', () => {
+          removeWordFromWrongNotes(item.en);
+          showToast(`'${item.en}' 단어를 외움 처리했습니다!`);
+          sound.playClick();
+        });
+
+        container.appendChild(row);
+      });
+    }
+
+    /* ========================================================
+       10. VOCABULARY & FLASHCARDS
+       ======================================================== */
+    function renderVocabList(filterQuery = '') {
+      const container = document.getElementById('vocab-items-container');
+      const totalCountEl = document.getElementById('vocab-total-count');
+      const matchCountEl = document.getElementById('vocab-search-match-count');
+      totalCountEl.textContent = state.words.length;
+
+      const query = filterQuery.toLowerCase().trim();
+      const filtered = state.words.filter(w => {
+        if (!query) return true;
+        return w.en.toLowerCase().includes(query) || w.ko.toLowerCase().includes(query);
+      });
+
+      if (query) {
+        matchCountEl.textContent = `(검색 결과: ${filtered.length}개)`;
+      } else {
+        matchCountEl.textContent = '';
+      }
+
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon">🔍</div>
+            <div class="empty-text">검색 결과가 없습니다.</div>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = '';
+      // Limit DOM render to 200 items for silky-smooth scrolling
+      const displayChunk = filtered.slice(0, 200);
+      displayChunk.forEach(item => {
+        const row = document.createElement('div');
+        row.className = 'vocab-item';
+        row.innerHTML = `
+          <div class="vocab-info">
+            <div class="vocab-en">${item.en}</div>
+            <div class="vocab-ko">${item.ko}</div>
+          </div>
+          <div class="vocab-actions">
+            <button class="btn-sm-icon" onclick="speakText('${item.en}')" title="발음 듣기">🔊</button>
+          </div>
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    function renderFlashcard() {
+      if (state.words.length === 0) return;
+      const cur = state.words[state.flashcardIndex];
+      document.getElementById('fc-word-front').textContent = cur.en;
+      document.getElementById('fc-word-back').textContent = cur.ko;
+      document.getElementById('fc-index-display').textContent = `${state.flashcardIndex + 1} / ${state.words.length}`;
+
+      const inner = document.getElementById('flashcard-inner');
+      inner.classList.remove('flipped');
+      state.flashcardFlipped = false;
+    }
+
+    /* ========================================================
+       11. EVENT LISTENERS & INITIALIZATION
+       ======================================================== */
+    function setupEventListeners() {
+      // Theme toggle
+      document.getElementById('btn-theme-toggle').addEventListener('click', () => {
+        setTheme(state.theme === 'dark' ? 'light' : 'dark');
+      });
+
+      // Sound toggle
+      document.getElementById('btn-sound-toggle').addEventListener('click', () => {
+        state.soundEnabled = !state.soundEnabled;
+        sound.enabled = state.soundEnabled;
+        safeStorage.setItem(STORAGE_KEYS.SOUND, state.soundEnabled);
+        updateSoundButtonUI();
+        showToast(state.soundEnabled ? '효과음이 켜졌습니다.' : '효과음이 꺼졌습니다.');
+      });
+
+      // Attendance button
+      document.getElementById('btn-do-attendance').addEventListener('click', checkAttendance);
+
+      // Calendar month navigation
+      document.getElementById('btn-cal-prev').addEventListener('click', () => {
+        if (state.calMonth === 0) {
+          state.calMonth = 11;
+          state.calYear -= 1;
+        } else {
+          state.calMonth -= 1;
+        }
+        renderAttendanceUI();
+        sound.playClick();
+      });
+
+      document.getElementById('btn-cal-next').addEventListener('click', () => {
+        if (state.calMonth === 11) {
+          state.calMonth = 0;
+          state.calYear += 1;
+        } else {
+          state.calMonth += 1;
+        }
+        renderAttendanceUI();
+        sound.playClick();
+      });
+
+      // Tabs switching
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+          document.querySelectorAll('.view-content').forEach(v => v.classList.remove('active'));
+
+          btn.classList.add('active');
+          const targetTab = btn.dataset.tab;
+          document.getElementById(`tab-view-${targetTab}`).classList.add('active');
+
+          if (targetTab === 'vocab') renderVocabList();
+          if (targetTab === 'wrong') renderWrongNotesList();
+        });
+      });
+
+      // Mode card selection
+      document.querySelectorAll('.mode-card').forEach(card => {
+        card.addEventListener('click', () => {
+          document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('selected'));
+          card.classList.add('selected');
+          state.quiz.mode = card.dataset.mode;
+        });
+      });
+
+      // Count pills selection
+      document.querySelectorAll('.count-pill').forEach(pill => {
+        pill.addEventListener('click', () => {
+          if (!pill.dataset.count) return;
+          document.querySelectorAll('.count-selector .count-pill').forEach(p => p.classList.remove('active'));
+          pill.classList.add('active');
+          state.quiz.targetCount = parseInt(pill.dataset.count, 10);
+          document.getElementById('btn-start-quiz').querySelector('span').textContent = `🚀 ${state.quiz.targetCount}문제 시험 시작하기`;
+        });
+      });
+
+      // Quiz Start Buttons
+      document.getElementById('btn-start-quiz').addEventListener('click', () => startQuiz(false));
+      document.getElementById('btn-start-wrong-only').addEventListener('click', () => startQuiz(true));
+      document.getElementById('btn-quiz-from-wrong-tab').addEventListener('click', () => {
+        document.querySelector('[data-tab="quiz"]').click();
+        startQuiz(true);
+      });
+      document.getElementById('btn-restart-quiz').addEventListener('click', () => {
+        document.getElementById('quiz-result-screen').style.display = 'none';
+        document.getElementById('quiz-setup-screen').style.display = 'block';
+      });
+
+      // Abort Quiz
+      document.getElementById('btn-abort-quiz').addEventListener('click', () => {
+        if (confirm('진행 중인 시험을 중단하고 홈으로 돌아갈까요?')) {
+          document.getElementById('quiz-active-screen').style.display = 'none';
+          document.getElementById('quiz-setup-screen').style.display = 'block';
+        }
+      });
+
+      // Keyboard shortcuts for quiz (1~5 keys)
+      window.addEventListener('keydown', (e) => {
+        if (document.getElementById('quiz-active-screen').style.display === 'block') {
+          const keyNum = parseInt(e.key, 10);
+          if (keyNum >= 1 && keyNum <= 5) {
+            const buttons = document.querySelectorAll('.choice-btn');
+            if (buttons[keyNum - 1] && !buttons[keyNum - 1].disabled) {
+              buttons[keyNum - 1].click();
+            }
+          }
+        }
+      });
+
+      // Vocabulary Search
+      document.getElementById('vocab-search-input').addEventListener('input', (e) => {
+        renderVocabList(e.target.value);
+      });
+
+      // Wrong Notes Search
+      document.getElementById('wrong-search-input').addEventListener('input', (e) => {
+        renderWrongNotesList(e.target.value);
+      });
+
+      // Clear all wrong notes
+      document.getElementById('btn-clear-all-wrongs').addEventListener('click', () => {
+        if (state.wrongNotes.length === 0) return;
+        if (confirm('오답노트에 수집된 모든 단어를 삭제하시겠습니까?')) {
+          state.wrongNotes = [];
+          saveWrongNotes();
+          renderWrongNotesList();
+          showToast('오답노트가 초기화되었습니다.');
+        }
+      });
+
+      // Vocab List / Flashcard Switch
+      document.getElementById('btn-vocab-view-list').addEventListener('click', () => {
+        document.getElementById('btn-vocab-view-list').classList.add('active');
+        document.getElementById('btn-vocab-view-cards').classList.remove('active');
+        document.getElementById('vocab-list-wrapper').style.display = 'block';
+        document.getElementById('vocab-flashcard-wrapper').style.display = 'none';
+      });
+
+      document.getElementById('btn-vocab-view-cards').addEventListener('click', () => {
+        document.getElementById('btn-vocab-view-cards').classList.add('active');
+        document.getElementById('btn-vocab-view-list').classList.remove('active');
+        document.getElementById('vocab-list-wrapper').style.display = 'none';
+        document.getElementById('vocab-flashcard-wrapper').style.display = 'block';
+        renderFlashcard();
+      });
+
+      // Flashcard interactions
+      document.getElementById('flashcard-box').addEventListener('click', () => {
+        const inner = document.getElementById('flashcard-inner');
+        inner.classList.toggle('flipped');
+        state.flashcardFlipped = !state.flashcardFlipped;
+      });
+
+      document.getElementById('fc-tts-btn').addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (state.words[state.flashcardIndex]) {
+          speakText(state.words[state.flashcardIndex].en);
+        }
+      });
+
+      document.getElementById('fc-next-btn').addEventListener('click', () => {
+        if (state.flashcardIndex < state.words.length - 1) {
+          state.flashcardIndex++;
+        } else {
+          state.flashcardIndex = 0;
+        }
+        renderFlashcard();
+      });
+
+      document.getElementById('fc-prev-btn').addEventListener('click', () => {
+        if (state.flashcardIndex > 0) {
+          state.flashcardIndex--;
+        } else {
+          state.flashcardIndex = state.words.length - 1;
+        }
+        renderFlashcard();
+      });
+
+      // File upload dropzone & input
+      const dropzone = document.getElementById('upload-dropzone');
+      const fileInput = document.getElementById('file-input');
+
+      dropzone.addEventListener('click', () => fileInput.click());
+      dropzone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropzone.classList.add('dragover');
+      });
+      dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragover'));
+      dropzone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropzone.classList.remove('dragover');
+        if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+          readFile(e.dataTransfer.files[0]);
+        }
+      });
+
+      fileInput.addEventListener('change', (e) => {
+        if (e.target.files && e.target.files[0]) {
+          readFile(e.target.files[0]);
+        }
+      });
+
+      function readFile(file) {
+        if (!file.name.endsWith('.txt')) {
+          alert('영단어 텍스트(.txt) 파일만 업로드할 수 있습니다.');
+          return;
+        }
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+          const content = evt.target.result;
+          const parsed = parseWordText(content);
+          handleImportedWords(parsed);
+        };
+        reader.readAsText(file, 'utf-8');
+      }
+
+      // Import mode pills
+      document.getElementById('pill-import-replace').addEventListener('click', () => {
+        state.importMode = 'replace';
+        document.getElementById('pill-import-replace').classList.add('active');
+        document.getElementById('pill-import-append').classList.remove('active');
+      });
+
+      document.getElementById('pill-import-append').addEventListener('click', () => {
+        state.importMode = 'append';
+        document.getElementById('pill-import-append').classList.add('active');
+        document.getElementById('pill-import-replace').classList.remove('active');
+      });
+
+      // Export TXT
+      document.getElementById('btn-export-txt').addEventListener('click', exportWordsToTxt);
+
+      // Restore Default Words
+      document.getElementById('btn-restore-default').addEventListener('click', () => {
+        if (confirm('기본 단어장(551개)으로 복원하시겠습니까?')) {
+          state.words = [...DEFAULT_WORDS];
+          saveWords();
+          renderVocabList();
+          showToast('기본 단어장으로 복원되었습니다.');
+        }
+      });
+
+      // Reset All User Data
+      document.getElementById('btn-reset-userdata').addEventListener('click', () => {
+        if (confirm('출석 기록과 오답노트를 완전히 초기화하시겠습니까? (되돌릴 수 없습니다)')) {
+          state.wrongNotes = [];
+          state.attendance = { dates: [], streak: 0, lastDate: '' };
+          saveWrongNotes();
+          saveAttendance();
+          renderAttendanceUI();
+          renderWrongNotesList();
+          showToast('모든 사용자 데이터가 초기화되었습니다.');
+        }
+      });
+    }
+
+    // Initialize application safely
+    function initApp() {
+      try {
+        loadState();
+        renderAttendanceUI();
+        renderVocabList();
+        renderWrongNotesList();
+        updateWrongNoteBadges();
+        setupEventListeners();
+      } catch (err) {
+        console.error('App init error:', err);
+        const errDiv = document.createElement('div');
+        errDiv.style.cssText = 'position:fixed;top:0;left:0;right:0;background:#ef4444;color:white;padding:12px;z-index:99999;font-size:12px;word-break:break-all;';
+        errDiv.textContent = '모바일 로드 오류 복구 중: ' + (err.message || err);
+        document.body.prepend(errDiv);
+      }
+    }
+
+    window.addEventListener('error', (e) => {
+      console.warn('Unhandled error caught:', e.message);
+    });
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initApp);
+    } else {
+      initApp();
+    }
+
+    // Register Service Worker for PWA Offline App mode
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js').catch((err) => {
+          console.log('ServiceWorker not registered (file:// or unsupported):', err);
+        });
+      });
+    }
+  </script>
+</body>
+</html>
