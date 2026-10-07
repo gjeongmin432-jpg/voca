@@ -1,4 +1,4 @@
-const CACHE_NAME = 'vocamaster-v1';
+const CACHE_NAME = 'vocamaster-v2';
 const ASSETS = [
   './',
   './index.html',
